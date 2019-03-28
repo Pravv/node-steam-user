@@ -582,3 +582,19 @@ SteamUser.prototype._sendUnified = function(methodName, methodData, callback) {
 
 	this._send(header, exports.encodeProto(Proto, methodData), callback);
 };
+
+/**
+ * @param {string} msg
+ * @param {object|string} schema
+ * @public
+ */
+SteamUser.prototype.addProto = function(msg, schema) {
+	if (protobufs[msg]) throw new Error('Schema for ' + msg + ' already registered.');
+
+	const schemaObject = (typeof schema === 'string' ? Schema[schema] : schema);
+	if (!schemaObject.name) throw new Error('Invalid schema ' + schema);
+
+	protobufs[msg] = schemaObject;
+
+	return true;
+};
