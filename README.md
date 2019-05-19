@@ -239,6 +239,16 @@ Added in 4.0.0.
 
 Defaults to `english`.
 
+### webCompatibilityMode
+
+If you're having trouble connecting to Steam (e.g. through a firewall or a proxy), set this to `true`. When in web
+compatibility mode, connections to Steam will always use WebSockets (the `protocol` option will be ignored, and you
+will get a warning if you set it to `TCP`), and only Steam servers listening on port 443 will be considered.
+
+Added in 4.6.0.
+
+Defaults to `false`.
+
 # Properties [^](#contents)
 
 ### steamID
@@ -453,7 +463,7 @@ You can provide either an entire sentryfile (preferred), or a Buffer containing 
 	- `authCode` - If you have a Steam Guard email code, you can provide it here. You might not need to, see the [`steamGuard`](#steamguard) event. (Added in 1.9.0)
 	- `twoFactorCode` - If you have a Steam Guard mobile two-factor authentication code, you can provide it here. You might not need to, see the [`steamGuard`](#steamguard) event. (Added in 1.9.0)
 	- `rememberPassword` - `true` if you want to get a login key which can be used in lieu of a password for subsequent logins. `false` or omitted otherwise.
-	- `logonID` - A number to identify this login. The official Steam client derives this from your machine's private IP (it's the `obfustucated_private_ip` field in `CMsgClientLogOn`). If you try to logon twice to the same account from the same public IP with the same `logonID`, the first session will be kicked with reason `SteamUser.EResult.LogonSessionReplaced`. Defaults to `0` if not specified.
+	- `logonID` - A 32-bit integer to identify this login. The official Steam client derives this from your machine's private IP (it's the `obfustucated_private_ip` field in `CMsgClientLogOn`). If you try to logon twice to the same account from the same public IP with the same `logonID`, the first session will be kicked with reason `SteamUser.EResult.LogonSessionReplaced`. Defaults to `0` if not specified.
 	- `machineName` - A string containing the name of this machine that you want to report to Steam. This will be displayed on steamcommunity.com when you view your games list (when logged in).
 	- `clientOS` - A [number](https://github.com/DoctorMcKay/node-steam-user/blob/master/enums/EOSType.js) to identify your client OS. Auto-detected if you don't provide one.
 	- `dontRememberMachine` - If you're providing an `authCode` but you don't want Steam to remember this sentryfile, pass `true` here.
@@ -763,53 +773,65 @@ If you have the PICS cache enabled and the risk of getting stale data is accepta
 
 Access tokens are global. That is, everyone who has access to an app receives the same token. Tokens do not seem to expire.
 
-### getOwnedApps()
+### getOwnedApps([excludeSharedLicenses])
+- `excludeSharedLicenses` - Pass `true` to exclude apps that are owned via a shared license, and not directly on this account (default `false`)
 
-**v3.3.0 or later is required to use this method**
+**v3.3.0 or later is required to use this method**  
+**v4.7.0 or later is required to use `excludeSharedLicenses`**
 
 Returns an array of AppIDs which your account owns. This cannot be safely called until `appOwnershipCached` is emitted.
 
 `enablePicsCache` must be `true` to use this method. Otherwise, an `Error` will be thrown.
 
-### ownsApp(appid)
+### ownsApp(appid[, excludeSharedLicenses])
 - `appid` - A numeric AppID
+- `excludeSharedLicenses` - Pass `true` to exclude apps that are owned via a shared license, and not directly on this account (default `false`)
 
-**v3.3.0 or later is required to use this method**
+**v3.3.0 or later is required to use this method**  
+**v4.7.0 or later is required to use `excludeSharedLicenses`**
 
 Returns `true` if your account owns the specified AppID, or `false` if not. This cannot be safely called until
 `appOwnershipCached` is emitted.
 
 `enablePicsCache` must be `true` to use this method. Otherwise, an `Error` will be thrown.
 
-### getOwnedDepots()
+### getOwnedDepots([excludeSharedLicenses])
+- `excludeSharedLicenses` - Pass `true` to exclude depots that are owned via a shared license, and not directly on this account (default `false`)
 
-**v3.3.0 or later is required to use this method**
+**v3.3.0 or later is required to use this method**  
+**v4.7.0 or later is required to use `excludeSharedLicenses`**
 
 Returns an array of depot IDs which your account owns. This cannot be safely called until `appOwnershipCached` is emitted.
 
 `enablePicsCache` must be `true` to use this method. Otherwise, an `Error` will be thrown.
 
-### ownsDepot(depotid)
+### ownsDepot(depotid[, excludeSharedLicenses])
 - `depotid` - A numeric depot ID
+- `excludeSharedLicenses` - Pass `true` to exclude depots that are owned via a shared license, and not directly on this account (default `false`)
 
-**v3.3.0 or later is required to use this method**
+**v3.3.0 or later is required to use this method**  
+**v4.7.0 or later is required to use `excludeSharedLicenses`**
 
 Returns `true` if your account owns the specified depot, or `false` if not. This cannot be safely called until
 `appOwnershipCached` is emitted.
 
 `enablePicsCache` must be `true` to use this method. Otherwise, an `Error` will be thrown.
 
-### getOwnedPackages()
+### getOwnedPackages([excludeSharedLicenses])
+- `excludeSharedLicenses` - Pass `true` to exclude packages that are owned via a shared license, and not directly on this account (default `false`)
 
-**v3.3.0 or later is required to use this method**
+**v3.3.0 or later is required to use this method**  
+**v4.7.0 or later is required to use `excludeSharedLicenses`**
 
 Returns an array of package IDs which your account owns. If you logged in anonymously, this can be safely called
 immediately following logon. Otherwise, this cannot be safely called until `licenses` is emitted.
 
-### ownsPackage(packageid)
+### ownsPackage(packageid[, excludeSharedLicenses])
 - `packageid` - A numeric package ID
+- `excludeSharedLicenses` - Pass `true` to exclude packages that are owned via a shared license, and not directly on this account (default `false`)
 
-**v3.3.0 or later is required to use this method**
+**v3.3.0 or later is required to use this method**  
+**v4.7.0 or later is required to use `excludeSharedLicenses`**
 
 Returns `true` if your account owns the specified package ID, or `false` if not. If you logged in anonymously, this can
 be safely called immediately following logon. Otherwise, this cannot be safely called until `licenses` is emitted.

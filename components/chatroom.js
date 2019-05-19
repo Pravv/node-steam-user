@@ -88,7 +88,7 @@ function SteamChatRoomClient(user) {
 /**
  * Get a list of the chat room groups you're in.
  * @param {function} [callback]
- * @return Promise
+ * @returns {Promise}
  */
 SteamChatRoomClient.prototype.getGroups = function(callback) {
 	return StdLib.Promises.callbackPromise(null, callback, (accept, reject) => {
@@ -111,10 +111,42 @@ SteamChatRoomClient.prototype.getGroups = function(callback) {
 };
 
 /**
+ * Set which groups are actively being chatted in by this session. It's unclear what effect this has on the chatting
+ * experience, other than retrieving chat room group states.
+ * @param {int[]|string[]|int|string} groupIDs - Array of group IDs you want data for
+ * @param {function} [callback]
+ * @returns {Promise}
+ */
+SteamChatRoomClient.prototype.setSessionActiveGroups = function(groupIDs, callback) {
+	if (!Array.isArray(groupIDs)) {
+		groupIDs = [groupIDs];
+	}
+
+	return StdLib.Promises.callbackPromise(null, callback, (resolve, reject) => {
+		this.user._sendUnified("ChatRoom.SetSessionActiveChatRoomGroups#1", {
+			"chat_group_ids": groupIDs,
+			"chat_groups_data_requested": groupIDs
+		}, (body, hdr) => {
+			let err = Helpers.eresultError(hdr.proto.eresult);
+			if (err) {
+				return reject(err);
+			}
+
+			let groups = {};
+			body.chat_states.forEach((group) => {
+				groups[group.header_state.chat_group_id] = processChatGroupState(group);
+			});
+
+			resolve({"chat_room_groups": groups});
+		});
+	});
+};
+
+/**
  * Get details from a chat group invite link.
  * @param {string} linkUrl
  * @param {function} [callback]
- * @return Promise
+ * @returns {Promise}
  */
 SteamChatRoomClient.prototype.getInviteLinkInfo = function(linkUrl, callback) {
 	return StdLib.Promises.callbackPromise(null, callback, (accept, reject) => {
@@ -153,7 +185,7 @@ SteamChatRoomClient.prototype.getInviteLinkInfo = function(linkUrl, callback) {
  * Get the chat room group info for a clan (Steam group). Allows you to join a group chat.
  * @param {SteamID|string} clanSteamID - The group's SteamID or a string that can parse into one
  * @param {function} [callback]
- * @return {Promise}
+ * @returns {Promise}
  */
 SteamChatRoomClient.prototype.getClanChatGroupInfo = function(clanSteamID, callback) {
 	return StdLib.Promises.callbackPromise(null, callback, (accept, reject) => {
@@ -344,7 +376,7 @@ SteamChatRoomClient.prototype.deleteInviteLink = function(linkUrl, callback) {
  * @param {string} message
  * @param {{[chatEntryType], [containsBbCode]}} [options]
  * @param {function} [callback]
- * @return Promise
+ * @returns {Promise}
  */
 SteamChatRoomClient.prototype.sendFriendMessage = function(steamId, message, options, callback) {
 	if (typeof options === 'function') {
@@ -387,7 +419,7 @@ SteamChatRoomClient.prototype.sendFriendMessage = function(steamId, message, opt
  * Inform a friend that you're typing a message to them.
  * @param {SteamID|string} steamId
  * @param {function} [callback]
- * @return Promise
+ * @returns {Promise}
  */
 SteamChatRoomClient.prototype.sendFriendTyping = function(steamId, callback) {
 	return this.sendFriendMessage(steamId, "", {"chatEntryType": EChatEntryType.Typing}, callback);
@@ -399,7 +431,7 @@ SteamChatRoomClient.prototype.sendFriendTyping = function(steamId, callback) {
  * @param {int|string} chatId
  * @param {string} message
  * @param {function} [callback]
- * @return Promise
+ * @returns {Promise}
  */
 SteamChatRoomClient.prototype.sendChatMessage = function(groupId, chatId, message, callback) {
 	return StdLib.Promises.callbackPromise(null, callback, (accept, reject) => {
@@ -481,7 +513,7 @@ SteamChatRoomClient.prototype.getFriendMessageHistory = function(friendSteamId, 
  * @param {int|string} chatId
  * @param {{[maxCount], [lastTime], [lastOrdinal], [startTime], [startOrdinal]}} [options]
  * @param {function} [callback]
- * @return Promise
+ * @returns {Promise}
  */
 SteamChatRoomClient.prototype.getChatMessageHistory = function(groupId, chatId, options, callback) {
 	if (typeof options === 'function') {
@@ -561,7 +593,7 @@ SteamChatRoomClient.prototype.ackChatMessage = function(chatGroupId, chatId, tim
  * @param {int|string} chatId
  * @param {{server_timestamp, ordinal}[]} messages
  * @param {function} [callback]
- * @return {Promise}
+ * @returns {Promise}
  */
 SteamChatRoomClient.prototype.deleteChatMessages = function(groupId, chatId, messages, callback) {
 	return StdLib.Promises.callbackPromise(null, callback, true, (accept, reject) => {
@@ -613,7 +645,7 @@ SteamChatRoomClient.prototype.deleteChatMessages = function(groupId, chatId, mes
  * @param {SteamID|string} steamId
  * @param {Date|int} [expireTime] - Time when they should be allowed to join again. Omit for immediate.
  * @param {function} [callback]
- * @return {Promise}
+ * @returns {Promise}
  */
 SteamChatRoomClient.prototype.kickUserFromGroup = function(groupId, steamId, expireTime, callback) {
 	return StdLib.Promises.callbackPromise(null, callback, true, (accept, reject) => {
@@ -750,9 +782,9 @@ function preProcessObject(obj) {
 			id.instance = SteamID.Instance.ALL;
 			id.accountid = val;
 			obj[key] = id;
-		} else if ((key == 'accountid' || key.match(/^accountid_/) || key.match(/_accountid$/)) && typeof val === 'number') {
+		} else if ((key == 'accountid' || key.match(/^accountid_/) || key.match(/_accountid$/)) && (typeof val === 'number' || val === null)) {
 			let newKey = key == 'accountid' ? 'steamid' : key.replace('accountid_', 'steamid_').replace('_accountid', '_steamid');
-			obj[newKey] = val === 0 ? null : SteamID.fromIndividualAccountID(val);
+			obj[newKey] = val === 0 || val === null ? null : SteamID.fromIndividualAccountID(val);
 			delete obj[key];
 		} else if (key.includes('avatar_sha')) {
 			let url = null;

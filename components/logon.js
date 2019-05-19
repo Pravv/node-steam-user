@@ -40,6 +40,12 @@ SteamUser.prototype.logOn = function(details) {
 			// We're not logging on with saved details
 			details = details || {};
 
+			let maxUint32 = Math.pow(2, 32) - 1;
+			if (details.logonID && details.logonID > maxUint32) {
+				process.stderr.write("[steam-user] Warning: logonID " + details.logonID + " is greater than " + maxUint32 + " and has been truncated.\n");
+				details.logonID = maxUint32;
+			}
+
 			this._logOnDetails = {
 				"account_name": details.accountName,
 				"password": details.password,
@@ -221,24 +227,25 @@ SteamUser.prototype.logOn = function(details) {
 };
 
 SteamUser.prototype._doConnection = function() {
-	let thisProtocol = this.options.protocol;
+	const EConnectionProtocol = SteamUser.EConnectionProtocol;
+	let thisProtocol = this.options.webCompatibilityMode ? EConnectionProtocol.WebSocket : this.options.protocol;
 
-	if (thisProtocol == SteamUser.EConnectionProtocol.Auto) {
+	if (thisProtocol == EConnectionProtocol.Auto) {
 		if (this._cmList.auto_pct_websocket) {
 			let roll = Math.floor(Math.random() * 100);
-			thisProtocol = roll <= this._cmList.auto_pct_websocket ? SteamUser.EConnectionProtocol.WebSocket : SteamUser.EConnectionProtocol.TCP;
-			this.emit('debug', 'Using ' + (thisProtocol == SteamUser.EConnectionProtocol.WebSocket ? 'WebSocket' : 'TCP') + '; we rolled ' + roll + ' and percent to use WS is ' + this._cmList.auto_pct_websocket);
+			thisProtocol = roll <= this._cmList.auto_pct_websocket ? EConnectionProtocol.WebSocket : EConnectionProtocol.TCP;
+			this.emit('debug', 'Using ' + (thisProtocol == EConnectionProtocol.WebSocket ? 'WebSocket' : 'TCP') + '; we rolled ' + roll + ' and percent to use WS is ' + this._cmList.auto_pct_websocket);
 		} else {
-			thisProtocol = SteamUser.EConnectionProtocol.TCP;
+			thisProtocol = EConnectionProtocol.TCP;
 		}
 	}
 
 	switch (thisProtocol) {
-		case SteamUser.EConnectionProtocol.TCP:
+		case EConnectionProtocol.TCP:
 			this._connection = new TCPConnection(this);
 			break;
 
-		case SteamUser.EConnectionProtocol.WebSocket:
+		case EConnectionProtocol.WebSocket:
 			this._connection = new WebSocketConnection(this);
 			break;
 
@@ -330,6 +337,10 @@ SteamUser.prototype._saveCMList = function() {
 };
 
 SteamUser.prototype.relog = function() {
+	if (!this.steamID) {
+		throw new Error("Cannot relog if not already connected");
+	}
+
 	if (this.steamID.type == SteamID.Type.INDIVIDUAL && (!this._logOnDetails || !this._logOnDetails.should_remember_password || !this._logOnDetails.login_key)) {
 		throw new Error("To use relog(), you must specify rememberPassword=true when logging on and wait for loginKey to be emitted");
 	}
