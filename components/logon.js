@@ -420,21 +420,17 @@ SteamUser.prototype._handlerManager.add(SteamUser.EMsg.ClientLogOnResponse, func
 
 		case EResult.AccountLogonDenied:
 		case EResult.AccountLoginDeniedNeedTwoFactor:
-		case EResult.TwoFactorCodeMismatch:
+		case EResult.TwoFactorCodeMismatch: {
 			// server is up, so reset logon timer
 			delete this._logonTimeout;
 
 			this._disconnect(true);
 
-			let isEmailCode = body.eresult == EResult.AccountLogonDenied;
-			let lastCodeWrong = body.eresult == EResult.TwoFactorCodeMismatch;
-
-			this._steamGuardPrompt(isEmailCode ? body.email_domain : null, lastCodeWrong, (code) => {
-				this._logOnDetails[isEmailCode ? 'auth_code' : 'two_factor_code'] = code;
-				this.logOn(true);
-			});
-
+			let error = new Error(EResult[body.eresult] || body.eresult);
+			error.eresult = body.eresult;
+			this.emit('error', error);
 			break;
+		}
 
 		case EResult.Fail:
 		case EResult.ServiceUnavailable:
