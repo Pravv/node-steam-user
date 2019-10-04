@@ -83,6 +83,12 @@ function SteamChatRoomClient(user) {
 
 		this.chat.emit('chatMessagesModified', body);
 	});
+
+	this.user._handlerManager.add('ChatRoomClient.NotifyChatRoomGroupRoomsChange#1', function(body) {
+		body = preProcessObject(body);
+		body.chat_rooms.map(room => processChatRoomState(room, true));
+		this.chat.emit('chatRoomGroupRoomsChange', body);
+	});
 }
 
 /**
@@ -91,9 +97,9 @@ function SteamChatRoomClient(user) {
  * @returns {Promise}
  */
 SteamChatRoomClient.prototype.getGroups = function(callback) {
-	return StdLib.Promises.callbackPromise(null, callback, (accept, reject) => {
+	return StdLib.Promises.callbackPromise(null, callback, (resolve, reject) => {
 		this.user._sendUnified("ChatRoom.GetMyChatRoomGroups#1", {}, (body, hdr) => {
-			let err = Helpers.eresultError(hdr.proto.eresult);
+			let err = Helpers.eresultError(hdr.proto);
 			if (err) {
 				return reject(err);
 			}
@@ -105,7 +111,7 @@ SteamChatRoomClient.prototype.getGroups = function(callback) {
 			});
 
 			body.chat_room_groups = groups;
-			accept(body);
+			resolve(body);
 		});
 	});
 };
@@ -127,7 +133,7 @@ SteamChatRoomClient.prototype.setSessionActiveGroups = function(groupIDs, callba
 			"chat_group_ids": groupIDs,
 			"chat_groups_data_requested": groupIDs
 		}, (body, hdr) => {
-			let err = Helpers.eresultError(hdr.proto.eresult);
+			let err = Helpers.eresultError(hdr.proto);
 			if (err) {
 				return reject(err);
 			}
@@ -149,7 +155,7 @@ SteamChatRoomClient.prototype.setSessionActiveGroups = function(groupIDs, callba
  * @returns {Promise}
  */
 SteamChatRoomClient.prototype.getInviteLinkInfo = function(linkUrl, callback) {
-	return StdLib.Promises.callbackPromise(null, callback, (accept, reject) => {
+	return StdLib.Promises.callbackPromise(null, callback, (resolve, reject) => {
 		let match = linkUrl.match(/^https?:\/\/s\.team\/chat\/([^\/]+)$/);
 		if (!match) {
 			return reject(new Error("Invalid invite link"));
@@ -162,7 +168,7 @@ SteamChatRoomClient.prototype.getInviteLinkInfo = function(linkUrl, callback) {
 				return reject(err);
 			}
 
-			let err = Helpers.eresultError(hdr.proto.eresult);
+			let err = Helpers.eresultError(hdr.proto);
 			if (err) {
 				return reject(err);
 			}
@@ -176,7 +182,7 @@ SteamChatRoomClient.prototype.getInviteLinkInfo = function(linkUrl, callback) {
 			body.user_chat_group_state = processUserChatGroupState(body.user_chat_group_state, true);
 			body.banned = !!body.banned;
 			body.invite_code = match[1];
-			accept(body);
+			resolve(body);
 		});
 	});
 };
@@ -188,7 +194,7 @@ SteamChatRoomClient.prototype.getInviteLinkInfo = function(linkUrl, callback) {
  * @returns {Promise}
  */
 SteamChatRoomClient.prototype.getClanChatGroupInfo = function(clanSteamID, callback) {
-	return StdLib.Promises.callbackPromise(null, callback, (accept, reject) => {
+	return StdLib.Promises.callbackPromise(null, callback, (resolve, reject) => {
 		clanSteamID = Helpers.steamID(clanSteamID);
 		if (clanSteamID.type != SteamID.Type.CLAN) {
 			return reject(new Error("SteamID is not for a clan"));
@@ -209,13 +215,13 @@ SteamChatRoomClient.prototype.getClanChatGroupInfo = function(clanSteamID, callb
 				return reject(err);
 			}
 
-			let err = Helpers.eresultError(hdr.proto.eresult);
+			let err = Helpers.eresultError(hdr.proto);
 			if (err) {
 				return reject(err);
 			}
 
 			body.chat_group_summary = processChatGroupSummary(body.chat_group_summary);
-			accept(body);
+			resolve(body);
 		});
 	});
 };
@@ -233,7 +239,7 @@ SteamChatRoomClient.prototype.joinGroup = function(groupId, inviteCode, callback
 		inviteCode = undefined;
 	}
 
-	return StdLib.Promises.callbackPromise(null, callback, (accept, reject) => {
+	return StdLib.Promises.callbackPromise(null, callback, (resolve, reject) => {
 		this.user._sendUnified("ChatRoom.JoinChatRoomGroup#1", {
 			"chat_group_id": groupId,
 			"invite_code": inviteCode
@@ -244,7 +250,7 @@ SteamChatRoomClient.prototype.joinGroup = function(groupId, inviteCode, callback
 				return reject(err);
 			}
 
-			let err = Helpers.eresultError(hdr.proto.eresult);
+			let err = Helpers.eresultError(hdr.proto);
 			if (err) {
 				return reject(err);
 			}
@@ -252,7 +258,7 @@ SteamChatRoomClient.prototype.joinGroup = function(groupId, inviteCode, callback
 			body = preProcessObject(body);
 			body.state = processChatGroupState(body.state, true);
 			body.user_chat_state = processUserChatGroupState(body.user_chat_state, true);
-			accept(body);
+			resolve(body);
 		});
 	});
 };
@@ -265,17 +271,17 @@ SteamChatRoomClient.prototype.joinGroup = function(groupId, inviteCode, callback
  * @returns {Promise}
  */
 SteamChatRoomClient.prototype.inviteUserToGroup = function(groupId, steamId, callback) {
-	return StdLib.Promises.callbackPromise(null, callback, true, (accept, reject) => {
+	return StdLib.Promises.callbackPromise(null, callback, true, (resolve, reject) => {
 		this.user._sendUnified("ChatRoom.InviteFriendToChatRoomGroup#1", {
 			"chat_group_id": groupId,
 			"steamid": Helpers.steamID(steamId).toString()
 		}, (body, hdr) => {
-			let err = Helpers.eresultError(hdr.proto.eresult);
+			let err = Helpers.eresultError(hdr.proto);
 			if (err) {
 				return reject(err);
 			}
 
-			accept();
+			resolve();
 		});
 	});
 };
@@ -301,7 +307,7 @@ SteamChatRoomClient.prototype.createInviteLink = function(groupId, options, call
 			"seconds_valid": options.secondsValid || 60 * 60,
 			"chat_id": options.voiceChatId
 		}, (body, hdr) => {
-			let err = Helpers.eresultError(hdr.proto.eresult);
+			let err = Helpers.eresultError(hdr.proto);
 			if (err) {
 				return reject(err);
 			}
@@ -323,7 +329,7 @@ SteamChatRoomClient.prototype.getGroupInviteLinks = function(groupId, callback) 
 		this.user._sendUnified('ChatRoom.GetInviteLinksForGroup#1', {
 			"chat_group_id": groupId
 		}, (body, hdr) => {
-			let err = Helpers.eresultError(hdr.proto.eresult);
+			let err = Helpers.eresultError(hdr.proto);
 			if (err) {
 				return reject(err);
 			}
@@ -360,7 +366,7 @@ SteamChatRoomClient.prototype.deleteInviteLink = function(linkUrl, callback) {
 			"chat_group_id": details.group_summary.chat_group_id,
 			"invite_code": details.invite_code
 		}, (body, hdr) => {
-			let err = Helpers.eresultError(hdr.proto.eresult);
+			let err = Helpers.eresultError(hdr.proto);
 			if (err) {
 				return reject(err);
 			}
@@ -394,14 +400,14 @@ SteamChatRoomClient.prototype.sendFriendMessage = function(steamId, message, opt
 		options.containsBbCode = true;
 	}
 
-	return StdLib.Promises.callbackPromise(null, callback, true, (accept, reject) => {
+	return StdLib.Promises.callbackPromise(null, callback, true, (resolve, reject) => {
 		this.user._sendUnified("FriendMessages.SendMessage#1", {
 			"steamid": Helpers.steamID(steamId).toString(),
 			"chat_entry_type": options.chatEntryType,
 			"message": message,
 			"contains_bbcode": options.containsBbCode
 		}, (body, hdr) => {
-			let err = Helpers.eresultError(hdr.proto.eresult);
+			let err = Helpers.eresultError(hdr.proto);
 			if (err) {
 				return reject(err);
 			}
@@ -410,7 +416,7 @@ SteamChatRoomClient.prototype.sendFriendMessage = function(steamId, message, opt
 			body.ordinal = body.ordinal || 0;
 			body.modified_message = body.modified_message || message;
 			body.message_bbcode_parsed = parseBbCode(body.modified_message);
-			accept(body);
+			resolve(body);
 		});
 	});
 };
@@ -434,13 +440,13 @@ SteamChatRoomClient.prototype.sendFriendTyping = function(steamId, callback) {
  * @returns {Promise}
  */
 SteamChatRoomClient.prototype.sendChatMessage = function(groupId, chatId, message, callback) {
-	return StdLib.Promises.callbackPromise(null, callback, (accept, reject) => {
+	return StdLib.Promises.callbackPromise(null, callback, (resolve, reject) => {
 		this.user._sendUnified("ChatRoom.SendChatMessage#1", {
 			"chat_group_id": groupId,
 			"chat_id": chatId,
 			"message": message
 		}, (body, hdr) => {
-			let err = Helpers.eresultError(hdr.proto.eresult);
+			let err = Helpers.eresultError(hdr.proto);
 			if (err) {
 				return reject(err);
 			}
@@ -449,7 +455,51 @@ SteamChatRoomClient.prototype.sendChatMessage = function(groupId, chatId, messag
 			body.ordinal = body.ordinal || 0;
 			body.modified_message = body.modified_message || message;
 			body.message_bbcode_parsed = parseBbCode(body.modified_message);
-			accept(body);
+			resolve(body);
+		});
+	});
+};
+
+/**
+ * Get a list of which friends we have "active" (recent) message sessions with.
+ * @param {{conversationsSince?: Date|int}} [options]
+ * @param {function} [callback]
+ * @returns {Promise<{sessions: {steamid_friend: SteamID, time_last_message: Date, time_last_view: Date, unread_message_count: int}[], timestamp: Date}>}
+ */
+SteamChatRoomClient.prototype.getActiveFriendMessageSessions = function(options, callback) {
+	if (typeof options === 'function') {
+		callback = options;
+		options = {};
+	}
+
+	options = options || {};
+
+	return StdLib.Promises.callbackPromise(null, callback, (resolve, reject) => {
+		let lastmessage_since = options.conversationsSince ? convertDateToUnix(options.conversationsSince) : undefined;
+
+		this.user._sendUnified("FriendMessages.GetActiveMessageSessions#1", {
+			lastmessage_since
+		}, (body, hdr) => {
+			let err = Helpers.eresultError(hdr.proto);
+			if (err) {
+				return reject(err);
+			}
+
+			let output = {
+				"sessions": body.message_sessions || [],
+				"timestamp": body.timestamp ? new Date(body.timestamp * 1000) : null
+			};
+
+			output.sessions = output.sessions.map((session) => {
+				return {
+					"steamid_friend": SteamID.fromIndividualAccountID(session.accountid_friend),
+					"time_last_message": session.last_message ? new Date(session.last_message * 1000) : null,
+					"time_last_view": session.last_view ? new Date(session.last_view * 1000) : null,
+					"unread_message_count": session.unread_message_count
+				};
+			});
+
+			resolve(output);
 		});
 	});
 };
@@ -469,7 +519,8 @@ SteamChatRoomClient.prototype.getFriendMessageHistory = function(friendSteamId, 
 
 	options = options || {};
 
-	return StdLib.Promises.callbackPromise(null, callback, (resolve, reject) => {
+	return StdLib.Promises.callbackPromise(null, callback, async (resolve, reject) => {
+		let steamid2 = Helpers.steamID(friendSteamId).toString();
 		let count = options.maxCount || 100;
 		let bbcode_format = options.wantBbcode !== false;
 		let rtime32_start_time = options.startTime ? convertDateToUnix(options.startTime) : undefined;
@@ -477,9 +528,23 @@ SteamChatRoomClient.prototype.getFriendMessageHistory = function(friendSteamId, 
 		let time_last = options.lastTime ? convertDateToUnix(options.lastTime) : Math.pow(2, 31) - 1;
 		let ordinal_last = time_last ? options.lastOrdinal : undefined;
 
+		let userLastViewed = 0;
+		try {
+			let activeSessions = await this.getActiveFriendMessageSessions();
+			let friendSess;
+			if (
+				activeSessions.sessions &&
+				(friendSess = activeSessions.sessions.find(sess => sess.steamid_friend.toString() == steamid2))
+			) {
+				userLastViewed = friendSess.time_last_view;
+			}
+		} catch (ex) {
+			this.user.emit('debug', `Exception reported calling getActiveFriendMessageSessions() inside of getFriendMessageHistory(): ${ex.message}`);
+		}
+
 		this.user._sendUnified("FriendMessages.GetRecentMessages#1", {
 			"steamid1": this.user.steamID.toString(),
-			"steamid2": Helpers.steamID(friendSteamId).toString(),
+			steamid2,
 			count,
 			"most_recent_conversation": false,
 			rtime32_start_time,
@@ -488,7 +553,7 @@ SteamChatRoomClient.prototype.getFriendMessageHistory = function(friendSteamId, 
 			time_last,
 			ordinal_last
 		}, (body, hdr) => {
-			let err = Helpers.eresultError(hdr.proto.eresult);
+			let err = Helpers.eresultError(hdr.proto);
 			if (err) {
 				return reject(err);
 			}
@@ -498,7 +563,8 @@ SteamChatRoomClient.prototype.getFriendMessageHistory = function(friendSteamId, 
 				"server_timestamp": new Date(msg.timestamp * 1000),
 				"ordinal": msg.ordinal || 0,
 				"message": msg.message,
-				"message_bbcode_parsed": bbcode_format ? parseBbCode(msg.message) : null
+				"message_bbcode_parsed": bbcode_format ? parseBbCode(msg.message) : null,
+				"unread": msg.accountid != this.user.steamID.accountid && (msg.timestamp * 1000) > userLastViewed
 			}));
 
 			body.more_available = !!body.more_available;
@@ -521,7 +587,7 @@ SteamChatRoomClient.prototype.getChatMessageHistory = function(groupId, chatId, 
 		options = {};
 	}
 
-	return StdLib.Promises.callbackPromise(null, callback, (accept, reject) => {
+	return StdLib.Promises.callbackPromise(null, callback, (resolve, reject) => {
 		let max_count = options.maxCount || 100;
 		let last_time = options.lastTime ? convertDateToUnix(options.lastTime) : undefined;
 		let last_ordinal = options.lastOrdinal;
@@ -537,7 +603,7 @@ SteamChatRoomClient.prototype.getChatMessageHistory = function(groupId, chatId, 
 			start_ordinal,
 			max_count
 		}, (body, hdr) => {
-			let err = Helpers.eresultError(hdr.proto.eresult);
+			let err = Helpers.eresultError(hdr.proto);
 			if (err) {
 				return reject(err);
 			}
@@ -556,7 +622,7 @@ SteamChatRoomClient.prototype.getChatMessageHistory = function(groupId, chatId, 
 			});
 
 			body.more_available = !!body.more_available;
-			accept(body);
+			resolve(body);
 		});
 	});
 };
@@ -596,7 +662,7 @@ SteamChatRoomClient.prototype.ackChatMessage = function(chatGroupId, chatId, tim
  * @returns {Promise}
  */
 SteamChatRoomClient.prototype.deleteChatMessages = function(groupId, chatId, messages, callback) {
-	return StdLib.Promises.callbackPromise(null, callback, true, (accept, reject) => {
+	return StdLib.Promises.callbackPromise(null, callback, true, (resolve, reject) => {
 		if (!Array.isArray(messages)) {
 			return reject(new Error('The \'messages\' argument must be an array'));
 		}
@@ -629,12 +695,93 @@ SteamChatRoomClient.prototype.deleteChatMessages = function(groupId, chatId, mes
 			"chat_id": chatId,
 			"messages": messages
 		}, (body, hdr) => {
-			let err = Helpers.eresultError(hdr.proto.eresult);
+			let err = Helpers.eresultError(hdr.proto);
 			if (err) {
 				return reject(err);
 			}
 
-			accept();
+			resolve();
+		});
+	});
+};
+
+/**
+ * Create a text/voice chat room in a group, provided you have permissions to do so.
+ * @param {int|string} groupId - The ID of the group in which you want to create the channel
+ * @param {string} name - The name of your new channel
+ * @param {{isVoiceRoom?: boolean}} [options] - Options for your new room
+ * @param {function} [callback]
+ * @returns {Promise}
+ */
+SteamChatRoomClient.prototype.createChatRoom = function(groupId, name, options, callback) {
+	if (typeof options == 'function') {
+		callback = options;
+		options = {};
+	}
+
+	options = options || {};
+
+	return StdLib.Promises.callbackPromise(null, callback, true, (resolve, reject) => {
+		this.user._sendUnified("ChatRoom.CreateChatRoom#1", {
+			"chat_group_id": groupId,
+			name,
+			"allow_voice": !!options.isVoiceRoom
+		}, (body, hdr) => {
+			let err = Helpers.eresultError(hdr.proto);
+			if (err) {
+				return reject(err);
+			}
+
+			processChatRoomState(body.chat_room, false);
+			resolve({"chat_room": body.chat_room});
+		});
+	});
+};
+
+/**
+ * Rename a text/voice chat room in a group, provided you have permissions to do so.
+ * @param {int|string} groupId - The ID of the group in which you want to rename the room
+ * @param {int|string} chatId - The ID of the chat room you want to rename
+ * @param {string} newChatRoomName - The new name for the room
+ * @param {function} [callback]
+ * @returns {Promise}
+ */
+SteamChatRoomClient.prototype.renameChatRoom = function(groupId, chatId, newChatRoomName, callback) {
+	return StdLib.Promises.callbackPromise(null, callback, true, (resolve, reject) => {
+		this.user._sendUnified("ChatRoom.RenameChatRoom#1", {
+			"chat_group_id": groupId,
+			"chat_id": chatId,
+			"name": newChatRoomName
+		}, (body, hdr) => {
+			let err = Helpers.eresultError(hdr.proto);
+			if (err) {
+				return reject(err);
+			}
+
+			resolve();
+		});
+	});
+};
+
+/**
+ * Delete a text/voice chat room in a group (and all the messages it contains), provided you have permissions to do so.
+ * @param {int|string} groupId - The ID of the group in which you want to delete a room
+ * @param {int|string} chatId - The ID of the room you want to delete
+ * @param {function} [callback]
+ * @returns {Promise}
+ */
+SteamChatRoomClient.prototype.deleteChatRoom = function(groupId, chatId, callback) {
+	return StdLib.Promises.callbackPromise(null, callback, true, (resolve, reject) => {
+		this.user._sendUnified("ChatRoom.DeleteChatRoom#1", {
+			"chat_group_id": groupId,
+			"chat_id": chatId
+		}, (body, hdr) => {
+			let err = Helpers.eresultError(hdr.proto);
+			if (err) {
+				return reject(err);
+			}
+
+			resolve();
 		});
 	});
 };
@@ -648,18 +795,66 @@ SteamChatRoomClient.prototype.deleteChatMessages = function(groupId, chatId, mes
  * @returns {Promise}
  */
 SteamChatRoomClient.prototype.kickUserFromGroup = function(groupId, steamId, expireTime, callback) {
-	return StdLib.Promises.callbackPromise(null, callback, true, (accept, reject) => {
+	return StdLib.Promises.callbackPromise(null, callback, true, (resolve, reject) => {
 		this.user._sendUnified("ChatRoom.KickUserFromGroup#1", {
 			"chat_group_id": groupId,
 			"steamid": Helpers.steamID(steamId).toString(),
 			"expiration": expireTime ? convertDateToUnix(expireTime) : Math.floor(Date.now() / 1000)
 		}, (body, hdr) => {
-			let err = Helpers.eresultError(hdr.proto.eresult);
+			let err = Helpers.eresultError(hdr.proto);
 			if (err) {
 				return reject(err);
 			}
 
-			accept();
+			resolve();
+		});
+	});
+};
+
+/**
+ * Get the ban list for a chat room group, provided you have the appropriate permissions.
+ * @param {int|string} groupId
+ * @param {function} [callback]
+ * @returns {Promise}
+ */
+SteamChatRoomClient.prototype.getGroupBanList = function(groupId, callback) {
+	return StdLib.Promises.callbackPromise(null, callback, false, (resolve, reject) => {
+		this.user._sendUnified("ChatRoom.GetBanList#1", {
+			"chat_group_id": groupId
+		}, (body, hdr) => {
+			let err = Helpers.eresultError(hdr.proto);
+			if (err) {
+				return reject(err);
+			}
+
+			preProcessObject(body);
+			resolve(body);
+		})
+	});
+};
+
+/**
+ * Ban or unban a user from a chat room group, provided you have the appropriate permissions.
+ * @param {int|string} groupId
+ * @param {string|SteamID} userSteamId
+ * @param {boolean} banState - True to ban, false to unban
+ * @param {function} [callback]
+ * @returns {Promise}
+ */
+SteamChatRoomClient.prototype.setGroupUserBanState = function(groupId, userSteamId, banState, callback) {
+	return StdLib.Promises.callbackPromise(null, callback, true, (resolve, reject) => {
+		this.user._sendUnified("ChatRoom.SetUserBanState#1", {
+			"chat_group_id": groupId,
+			"steamid": Helpers.steamID(userSteamId).toString(),
+			"ban_state": banState
+		}, (body, hdr) => {
+			let err = Helpers.eresultError(hdr.proto);
+			if (err) {
+				return reject(err);
+			}
+
+			// No data in the response
+			resolve();
 		});
 	});
 };
@@ -732,6 +927,11 @@ function processUserChatRoomState(state, preProcessed) {
 	return state;
 }
 
+/**
+ * @param {object} state
+ * @param {boolean} [preProcessed=false]
+ * @returns {object}
+ */
 function processChatRoomState(state, preProcessed) {
 	if (!preProcessed) {
 		state = preProcessObject(state);

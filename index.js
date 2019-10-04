@@ -1,7 +1,5 @@
-require('@doctormckay/stats-reporter').setup(require('./package.json'));
-
 const AppDirectory = require('appdirectory');
-const FileStorage = require('file-manager');
+const FileManager = require('file-manager');
 
 const HandlerManager = require('./components/classes/HandlerManager.js');
 const SteamChatRoomClient = require('./components/chatroom.js');
@@ -15,6 +13,7 @@ SteamUser.EClientUIMode = require('./resources/EClientUIMode.js');
 SteamUser.EConnectionProtocol = require('./resources/EConnectionProtocol.js');
 SteamUser.EMachineIDType = require('./resources/EMachineIDType.js');
 SteamUser.EPurchaseResult = require('./resources/EPurchaseResult.js');
+SteamUser.EPrivacyState = require('./resources/EPrivacyState.js');
 
 require('./resources/enums.js');
 
@@ -53,6 +52,7 @@ function SteamUser(options) {
 	this._authSeqThem = 0;
 	this._hSteamPipe = Math.floor(Math.random() * 1000000) + 1;
 	this._contentServers = [];
+	this._contentServersTimestamp = 0;
 	this._contentServerTokens = {};
 	this._lastNotificationCounts = {};
 	this._sessionID = 0;
@@ -111,7 +111,7 @@ function SteamUser(options) {
 	}
 
 	if (this.options.dataDirectory) {
-		this.storage = new FileStorage(this.options.dataDirectory);
+		this.storage = new FileManager(this.options.dataDirectory);
 	}
 
 	if (this.options.webCompatibilityMode && this.options.protocol == SteamUser.EConnectionProtocol.TCP) {
@@ -129,7 +129,7 @@ SteamUser.prototype.setOption = function(option, value) {
 	switch (option) {
 		case 'dataDirectory':
 			if (!this.storage) {
-				this.storage = new FileStorage(value);
+				this.storage = new FileManager(value);
 			} else {
 				this.storage.directory = value;
 			}
@@ -172,6 +172,7 @@ SteamUser.prototype._handlerManager = new HandlerManager();
 
 require('./components/connection.js');
 require('./components/messages.js');
+require('./components/filestorage.js');
 require('./components/webapi.js');
 require('./components/logon.js');
 require('./components/sentry.js');

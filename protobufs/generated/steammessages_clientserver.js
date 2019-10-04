@@ -16,6 +16,24 @@
     // Exported root namespace
     var $root = $protobuf.roots["default"] || ($protobuf.roots["default"] = {});
     
+    /**
+     * EMMSLobbyStatus enum.
+     * @exports EMMSLobbyStatus
+     * @enum {string}
+     * @property {number} k_EMMSLobbyStatusInvalid=0 k_EMMSLobbyStatusInvalid value
+     * @property {number} k_EMMSLobbyStatusExists=1 k_EMMSLobbyStatusExists value
+     * @property {number} k_EMMSLobbyStatusDoesNotExist=2 k_EMMSLobbyStatusDoesNotExist value
+     * @property {number} k_EMMSLobbyStatusNotAMember=3 k_EMMSLobbyStatusNotAMember value
+     */
+    $root.EMMSLobbyStatus = (function() {
+        var valuesById = {}, values = Object.create(valuesById);
+        values[valuesById[0] = "k_EMMSLobbyStatusInvalid"] = 0;
+        values[valuesById[1] = "k_EMMSLobbyStatusExists"] = 1;
+        values[valuesById[2] = "k_EMMSLobbyStatusDoesNotExist"] = 2;
+        values[valuesById[3] = "k_EMMSLobbyStatusNotAMember"] = 3;
+        return values;
+    })();
+    
     $root.CMsgClientUDSP2PSessionStarted = (function() {
     
         /**
@@ -5343,6 +5361,7 @@
              * @property {number|null} [total_non_steam_controller_count] GamePlayed total_non_steam_controller_count
              * @property {number|Long|null} [controller_workshop_file_id] GamePlayed controller_workshop_file_id
              * @property {number|null} [launch_source] GamePlayed launch_source
+             * @property {number|null} [vr_hmd_runtime] GamePlayed vr_hmd_runtime
              */
     
             /**
@@ -5529,6 +5548,14 @@
             GamePlayed.prototype.launch_source = 0;
     
             /**
+             * GamePlayed vr_hmd_runtime.
+             * @member {number} vr_hmd_runtime
+             * @memberof CMsgClientGamesPlayed.GamePlayed
+             * @instance
+             */
+            GamePlayed.prototype.vr_hmd_runtime = 0;
+    
+            /**
              * Creates a new GamePlayed instance using the specified properties.
              * @function create
              * @memberof CMsgClientGamesPlayed.GamePlayed
@@ -5594,6 +5621,8 @@
                     writer.uint32(/* id 20, wireType 0 =*/160).uint64(message.controller_workshop_file_id);
                 if (message.launch_source != null && message.hasOwnProperty("launch_source"))
                     writer.uint32(/* id 21, wireType 0 =*/168).uint32(message.launch_source);
+                if (message.vr_hmd_runtime != null && message.hasOwnProperty("vr_hmd_runtime"))
+                    writer.uint32(/* id 22, wireType 0 =*/176).uint32(message.vr_hmd_runtime);
                 return writer;
             };
     
@@ -5690,6 +5719,9 @@
                         break;
                     case 21:
                         message.launch_source = reader.uint32();
+                        break;
+                    case 22:
+                        message.vr_hmd_runtime = reader.uint32();
                         break;
                     default:
                         reader.skipType(tag & 7);
@@ -5789,6 +5821,9 @@
                 if (message.launch_source != null && message.hasOwnProperty("launch_source"))
                     if (!$util.isInteger(message.launch_source))
                         return "launch_source: integer expected";
+                if (message.vr_hmd_runtime != null && message.hasOwnProperty("vr_hmd_runtime"))
+                    if (!$util.isInteger(message.vr_hmd_runtime))
+                        return "vr_hmd_runtime: integer expected";
                 return null;
             };
     
@@ -5873,6 +5908,8 @@
                         message.controller_workshop_file_id = new $util.LongBits(object.controller_workshop_file_id.low >>> 0, object.controller_workshop_file_id.high >>> 0).toNumber(true);
                 if (object.launch_source != null)
                     message.launch_source = object.launch_source >>> 0;
+                if (object.vr_hmd_runtime != null)
+                    message.vr_hmd_runtime = object.vr_hmd_runtime >>> 0;
                 return message;
             };
     
@@ -5935,6 +5972,7 @@
                     } else
                         object.controller_workshop_file_id = options.longs === String ? "0" : 0;
                     object.launch_source = 0;
+                    object.vr_hmd_runtime = 0;
                 }
                 if (message.steam_id_gs != null && message.hasOwnProperty("steam_id_gs"))
                     if (typeof message.steam_id_gs === "number")
@@ -5987,6 +6025,8 @@
                         object.controller_workshop_file_id = options.longs === String ? $util.Long.prototype.toString.call(message.controller_workshop_file_id) : options.longs === Number ? new $util.LongBits(message.controller_workshop_file_id.low >>> 0, message.controller_workshop_file_id.high >>> 0).toNumber(true) : message.controller_workshop_file_id;
                 if (message.launch_source != null && message.hasOwnProperty("launch_source"))
                     object.launch_source = message.launch_source;
+                if (message.vr_hmd_runtime != null && message.hasOwnProperty("vr_hmd_runtime"))
+                    object.vr_hmd_runtime = message.vr_hmd_runtime;
                 return object;
             };
     
@@ -11240,446 +11280,6 @@
         return CMsgClientIsLimitedAccount;
     })();
     
-    $root.CMsgClientServerList = (function() {
-    
-        /**
-         * Properties of a CMsgClientServerList.
-         * @exports ICMsgClientServerList
-         * @interface ICMsgClientServerList
-         * @property {Array.<CMsgClientServerList.IServer>|null} [servers] CMsgClientServerList servers
-         */
-    
-        /**
-         * Constructs a new CMsgClientServerList.
-         * @exports CMsgClientServerList
-         * @classdesc Represents a CMsgClientServerList.
-         * @implements ICMsgClientServerList
-         * @constructor
-         * @param {ICMsgClientServerList=} [properties] Properties to set
-         */
-        function CMsgClientServerList(properties) {
-            this.servers = [];
-            if (properties)
-                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                    if (properties[keys[i]] != null)
-                        this[keys[i]] = properties[keys[i]];
-        }
-    
-        /**
-         * CMsgClientServerList servers.
-         * @member {Array.<CMsgClientServerList.IServer>} servers
-         * @memberof CMsgClientServerList
-         * @instance
-         */
-        CMsgClientServerList.prototype.servers = $util.emptyArray;
-    
-        /**
-         * Creates a new CMsgClientServerList instance using the specified properties.
-         * @function create
-         * @memberof CMsgClientServerList
-         * @static
-         * @param {ICMsgClientServerList=} [properties] Properties to set
-         * @returns {CMsgClientServerList} CMsgClientServerList instance
-         */
-        CMsgClientServerList.create = function create(properties) {
-            return new CMsgClientServerList(properties);
-        };
-    
-        /**
-         * Encodes the specified CMsgClientServerList message. Does not implicitly {@link CMsgClientServerList.verify|verify} messages.
-         * @function encode
-         * @memberof CMsgClientServerList
-         * @static
-         * @param {ICMsgClientServerList} message CMsgClientServerList message or plain object to encode
-         * @param {$protobuf.Writer} [writer] Writer to encode to
-         * @returns {$protobuf.Writer} Writer
-         */
-        CMsgClientServerList.encode = function encode(message, writer) {
-            if (!writer)
-                writer = $Writer.create();
-            if (message.servers != null && message.servers.length)
-                for (var i = 0; i < message.servers.length; ++i)
-                    $root.CMsgClientServerList.Server.encode(message.servers[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
-            return writer;
-        };
-    
-        /**
-         * Encodes the specified CMsgClientServerList message, length delimited. Does not implicitly {@link CMsgClientServerList.verify|verify} messages.
-         * @function encodeDelimited
-         * @memberof CMsgClientServerList
-         * @static
-         * @param {ICMsgClientServerList} message CMsgClientServerList message or plain object to encode
-         * @param {$protobuf.Writer} [writer] Writer to encode to
-         * @returns {$protobuf.Writer} Writer
-         */
-        CMsgClientServerList.encodeDelimited = function encodeDelimited(message, writer) {
-            return this.encode(message, writer).ldelim();
-        };
-    
-        /**
-         * Decodes a CMsgClientServerList message from the specified reader or buffer.
-         * @function decode
-         * @memberof CMsgClientServerList
-         * @static
-         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-         * @param {number} [length] Message length if known beforehand
-         * @returns {CMsgClientServerList} CMsgClientServerList
-         * @throws {Error} If the payload is not a reader or valid buffer
-         * @throws {$protobuf.util.ProtocolError} If required fields are missing
-         */
-        CMsgClientServerList.decode = function decode(reader, length) {
-            if (!(reader instanceof $Reader))
-                reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.CMsgClientServerList();
-            while (reader.pos < end) {
-                var tag = reader.uint32();
-                switch (tag >>> 3) {
-                case 1:
-                    if (!(message.servers && message.servers.length))
-                        message.servers = [];
-                    message.servers.push($root.CMsgClientServerList.Server.decode(reader, reader.uint32()));
-                    break;
-                default:
-                    reader.skipType(tag & 7);
-                    break;
-                }
-            }
-            return message;
-        };
-    
-        /**
-         * Decodes a CMsgClientServerList message from the specified reader or buffer, length delimited.
-         * @function decodeDelimited
-         * @memberof CMsgClientServerList
-         * @static
-         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-         * @returns {CMsgClientServerList} CMsgClientServerList
-         * @throws {Error} If the payload is not a reader or valid buffer
-         * @throws {$protobuf.util.ProtocolError} If required fields are missing
-         */
-        CMsgClientServerList.decodeDelimited = function decodeDelimited(reader) {
-            if (!(reader instanceof $Reader))
-                reader = new $Reader(reader);
-            return this.decode(reader, reader.uint32());
-        };
-    
-        /**
-         * Verifies a CMsgClientServerList message.
-         * @function verify
-         * @memberof CMsgClientServerList
-         * @static
-         * @param {Object.<string,*>} message Plain object to verify
-         * @returns {string|null} `null` if valid, otherwise the reason why it is not
-         */
-        CMsgClientServerList.verify = function verify(message) {
-            if (typeof message !== "object" || message === null)
-                return "object expected";
-            if (message.servers != null && message.hasOwnProperty("servers")) {
-                if (!Array.isArray(message.servers))
-                    return "servers: array expected";
-                for (var i = 0; i < message.servers.length; ++i) {
-                    var error = $root.CMsgClientServerList.Server.verify(message.servers[i]);
-                    if (error)
-                        return "servers." + error;
-                }
-            }
-            return null;
-        };
-    
-        /**
-         * Creates a CMsgClientServerList message from a plain object. Also converts values to their respective internal types.
-         * @function fromObject
-         * @memberof CMsgClientServerList
-         * @static
-         * @param {Object.<string,*>} object Plain object
-         * @returns {CMsgClientServerList} CMsgClientServerList
-         */
-        CMsgClientServerList.fromObject = function fromObject(object) {
-            if (object instanceof $root.CMsgClientServerList)
-                return object;
-            var message = new $root.CMsgClientServerList();
-            if (object.servers) {
-                if (!Array.isArray(object.servers))
-                    throw TypeError(".CMsgClientServerList.servers: array expected");
-                message.servers = [];
-                for (var i = 0; i < object.servers.length; ++i) {
-                    if (typeof object.servers[i] !== "object")
-                        throw TypeError(".CMsgClientServerList.servers: object expected");
-                    message.servers[i] = $root.CMsgClientServerList.Server.fromObject(object.servers[i]);
-                }
-            }
-            return message;
-        };
-    
-        /**
-         * Creates a plain object from a CMsgClientServerList message. Also converts values to other types if specified.
-         * @function toObject
-         * @memberof CMsgClientServerList
-         * @static
-         * @param {CMsgClientServerList} message CMsgClientServerList
-         * @param {$protobuf.IConversionOptions} [options] Conversion options
-         * @returns {Object.<string,*>} Plain object
-         */
-        CMsgClientServerList.toObject = function toObject(message, options) {
-            if (!options)
-                options = {};
-            var object = {};
-            if (options.arrays || options.defaults)
-                object.servers = [];
-            if (message.servers && message.servers.length) {
-                object.servers = [];
-                for (var j = 0; j < message.servers.length; ++j)
-                    object.servers[j] = $root.CMsgClientServerList.Server.toObject(message.servers[j], options);
-            }
-            return object;
-        };
-    
-        /**
-         * Converts this CMsgClientServerList to JSON.
-         * @function toJSON
-         * @memberof CMsgClientServerList
-         * @instance
-         * @returns {Object.<string,*>} JSON object
-         */
-        CMsgClientServerList.prototype.toJSON = function toJSON() {
-            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-        };
-    
-        CMsgClientServerList.Server = (function() {
-    
-            /**
-             * Properties of a Server.
-             * @memberof CMsgClientServerList
-             * @interface IServer
-             * @property {number|null} [server_type] Server server_type
-             * @property {number|null} [server_ip] Server server_ip
-             * @property {number|null} [server_port] Server server_port
-             */
-    
-            /**
-             * Constructs a new Server.
-             * @memberof CMsgClientServerList
-             * @classdesc Represents a Server.
-             * @implements IServer
-             * @constructor
-             * @param {CMsgClientServerList.IServer=} [properties] Properties to set
-             */
-            function Server(properties) {
-                if (properties)
-                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                        if (properties[keys[i]] != null)
-                            this[keys[i]] = properties[keys[i]];
-            }
-    
-            /**
-             * Server server_type.
-             * @member {number} server_type
-             * @memberof CMsgClientServerList.Server
-             * @instance
-             */
-            Server.prototype.server_type = 0;
-    
-            /**
-             * Server server_ip.
-             * @member {number} server_ip
-             * @memberof CMsgClientServerList.Server
-             * @instance
-             */
-            Server.prototype.server_ip = 0;
-    
-            /**
-             * Server server_port.
-             * @member {number} server_port
-             * @memberof CMsgClientServerList.Server
-             * @instance
-             */
-            Server.prototype.server_port = 0;
-    
-            /**
-             * Creates a new Server instance using the specified properties.
-             * @function create
-             * @memberof CMsgClientServerList.Server
-             * @static
-             * @param {CMsgClientServerList.IServer=} [properties] Properties to set
-             * @returns {CMsgClientServerList.Server} Server instance
-             */
-            Server.create = function create(properties) {
-                return new Server(properties);
-            };
-    
-            /**
-             * Encodes the specified Server message. Does not implicitly {@link CMsgClientServerList.Server.verify|verify} messages.
-             * @function encode
-             * @memberof CMsgClientServerList.Server
-             * @static
-             * @param {CMsgClientServerList.IServer} message Server message or plain object to encode
-             * @param {$protobuf.Writer} [writer] Writer to encode to
-             * @returns {$protobuf.Writer} Writer
-             */
-            Server.encode = function encode(message, writer) {
-                if (!writer)
-                    writer = $Writer.create();
-                if (message.server_type != null && message.hasOwnProperty("server_type"))
-                    writer.uint32(/* id 1, wireType 0 =*/8).uint32(message.server_type);
-                if (message.server_ip != null && message.hasOwnProperty("server_ip"))
-                    writer.uint32(/* id 2, wireType 0 =*/16).uint32(message.server_ip);
-                if (message.server_port != null && message.hasOwnProperty("server_port"))
-                    writer.uint32(/* id 3, wireType 0 =*/24).uint32(message.server_port);
-                return writer;
-            };
-    
-            /**
-             * Encodes the specified Server message, length delimited. Does not implicitly {@link CMsgClientServerList.Server.verify|verify} messages.
-             * @function encodeDelimited
-             * @memberof CMsgClientServerList.Server
-             * @static
-             * @param {CMsgClientServerList.IServer} message Server message or plain object to encode
-             * @param {$protobuf.Writer} [writer] Writer to encode to
-             * @returns {$protobuf.Writer} Writer
-             */
-            Server.encodeDelimited = function encodeDelimited(message, writer) {
-                return this.encode(message, writer).ldelim();
-            };
-    
-            /**
-             * Decodes a Server message from the specified reader or buffer.
-             * @function decode
-             * @memberof CMsgClientServerList.Server
-             * @static
-             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-             * @param {number} [length] Message length if known beforehand
-             * @returns {CMsgClientServerList.Server} Server
-             * @throws {Error} If the payload is not a reader or valid buffer
-             * @throws {$protobuf.util.ProtocolError} If required fields are missing
-             */
-            Server.decode = function decode(reader, length) {
-                if (!(reader instanceof $Reader))
-                    reader = $Reader.create(reader);
-                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.CMsgClientServerList.Server();
-                while (reader.pos < end) {
-                    var tag = reader.uint32();
-                    switch (tag >>> 3) {
-                    case 1:
-                        message.server_type = reader.uint32();
-                        break;
-                    case 2:
-                        message.server_ip = reader.uint32();
-                        break;
-                    case 3:
-                        message.server_port = reader.uint32();
-                        break;
-                    default:
-                        reader.skipType(tag & 7);
-                        break;
-                    }
-                }
-                return message;
-            };
-    
-            /**
-             * Decodes a Server message from the specified reader or buffer, length delimited.
-             * @function decodeDelimited
-             * @memberof CMsgClientServerList.Server
-             * @static
-             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-             * @returns {CMsgClientServerList.Server} Server
-             * @throws {Error} If the payload is not a reader or valid buffer
-             * @throws {$protobuf.util.ProtocolError} If required fields are missing
-             */
-            Server.decodeDelimited = function decodeDelimited(reader) {
-                if (!(reader instanceof $Reader))
-                    reader = new $Reader(reader);
-                return this.decode(reader, reader.uint32());
-            };
-    
-            /**
-             * Verifies a Server message.
-             * @function verify
-             * @memberof CMsgClientServerList.Server
-             * @static
-             * @param {Object.<string,*>} message Plain object to verify
-             * @returns {string|null} `null` if valid, otherwise the reason why it is not
-             */
-            Server.verify = function verify(message) {
-                if (typeof message !== "object" || message === null)
-                    return "object expected";
-                if (message.server_type != null && message.hasOwnProperty("server_type"))
-                    if (!$util.isInteger(message.server_type))
-                        return "server_type: integer expected";
-                if (message.server_ip != null && message.hasOwnProperty("server_ip"))
-                    if (!$util.isInteger(message.server_ip))
-                        return "server_ip: integer expected";
-                if (message.server_port != null && message.hasOwnProperty("server_port"))
-                    if (!$util.isInteger(message.server_port))
-                        return "server_port: integer expected";
-                return null;
-            };
-    
-            /**
-             * Creates a Server message from a plain object. Also converts values to their respective internal types.
-             * @function fromObject
-             * @memberof CMsgClientServerList.Server
-             * @static
-             * @param {Object.<string,*>} object Plain object
-             * @returns {CMsgClientServerList.Server} Server
-             */
-            Server.fromObject = function fromObject(object) {
-                if (object instanceof $root.CMsgClientServerList.Server)
-                    return object;
-                var message = new $root.CMsgClientServerList.Server();
-                if (object.server_type != null)
-                    message.server_type = object.server_type >>> 0;
-                if (object.server_ip != null)
-                    message.server_ip = object.server_ip >>> 0;
-                if (object.server_port != null)
-                    message.server_port = object.server_port >>> 0;
-                return message;
-            };
-    
-            /**
-             * Creates a plain object from a Server message. Also converts values to other types if specified.
-             * @function toObject
-             * @memberof CMsgClientServerList.Server
-             * @static
-             * @param {CMsgClientServerList.Server} message Server
-             * @param {$protobuf.IConversionOptions} [options] Conversion options
-             * @returns {Object.<string,*>} Plain object
-             */
-            Server.toObject = function toObject(message, options) {
-                if (!options)
-                    options = {};
-                var object = {};
-                if (options.defaults) {
-                    object.server_type = 0;
-                    object.server_ip = 0;
-                    object.server_port = 0;
-                }
-                if (message.server_type != null && message.hasOwnProperty("server_type"))
-                    object.server_type = message.server_type;
-                if (message.server_ip != null && message.hasOwnProperty("server_ip"))
-                    object.server_ip = message.server_ip;
-                if (message.server_port != null && message.hasOwnProperty("server_port"))
-                    object.server_port = message.server_port;
-                return object;
-            };
-    
-            /**
-             * Converts this Server to JSON.
-             * @function toJSON
-             * @memberof CMsgClientServerList.Server
-             * @instance
-             * @returns {Object.<string,*>} JSON object
-             */
-            Server.prototype.toJSON = function toJSON() {
-                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-            };
-    
-            return Server;
-        })();
-    
-        return CMsgClientServerList;
-    })();
-    
     $root.CMsgClientRequestedClientStats = (function() {
     
         /**
@@ -12616,6 +12216,260 @@
         })();
     
         return CMsgClientStat2;
+    })();
+    
+    $root.CMsgClientMMSSetRatelimitPolicyOnClient = (function() {
+    
+        /**
+         * Properties of a CMsgClientMMSSetRatelimitPolicyOnClient.
+         * @exports ICMsgClientMMSSetRatelimitPolicyOnClient
+         * @interface ICMsgClientMMSSetRatelimitPolicyOnClient
+         * @property {number|null} [app_id] CMsgClientMMSSetRatelimitPolicyOnClient app_id
+         * @property {boolean|null} [enable_rate_limits] CMsgClientMMSSetRatelimitPolicyOnClient enable_rate_limits
+         * @property {number|null} [seconds_per_message] CMsgClientMMSSetRatelimitPolicyOnClient seconds_per_message
+         * @property {number|null} [milliseconds_per_data_update] CMsgClientMMSSetRatelimitPolicyOnClient milliseconds_per_data_update
+         */
+    
+        /**
+         * Constructs a new CMsgClientMMSSetRatelimitPolicyOnClient.
+         * @exports CMsgClientMMSSetRatelimitPolicyOnClient
+         * @classdesc Represents a CMsgClientMMSSetRatelimitPolicyOnClient.
+         * @implements ICMsgClientMMSSetRatelimitPolicyOnClient
+         * @constructor
+         * @param {ICMsgClientMMSSetRatelimitPolicyOnClient=} [properties] Properties to set
+         */
+        function CMsgClientMMSSetRatelimitPolicyOnClient(properties) {
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+    
+        /**
+         * CMsgClientMMSSetRatelimitPolicyOnClient app_id.
+         * @member {number} app_id
+         * @memberof CMsgClientMMSSetRatelimitPolicyOnClient
+         * @instance
+         */
+        CMsgClientMMSSetRatelimitPolicyOnClient.prototype.app_id = 0;
+    
+        /**
+         * CMsgClientMMSSetRatelimitPolicyOnClient enable_rate_limits.
+         * @member {boolean} enable_rate_limits
+         * @memberof CMsgClientMMSSetRatelimitPolicyOnClient
+         * @instance
+         */
+        CMsgClientMMSSetRatelimitPolicyOnClient.prototype.enable_rate_limits = false;
+    
+        /**
+         * CMsgClientMMSSetRatelimitPolicyOnClient seconds_per_message.
+         * @member {number} seconds_per_message
+         * @memberof CMsgClientMMSSetRatelimitPolicyOnClient
+         * @instance
+         */
+        CMsgClientMMSSetRatelimitPolicyOnClient.prototype.seconds_per_message = 0;
+    
+        /**
+         * CMsgClientMMSSetRatelimitPolicyOnClient milliseconds_per_data_update.
+         * @member {number} milliseconds_per_data_update
+         * @memberof CMsgClientMMSSetRatelimitPolicyOnClient
+         * @instance
+         */
+        CMsgClientMMSSetRatelimitPolicyOnClient.prototype.milliseconds_per_data_update = 0;
+    
+        /**
+         * Creates a new CMsgClientMMSSetRatelimitPolicyOnClient instance using the specified properties.
+         * @function create
+         * @memberof CMsgClientMMSSetRatelimitPolicyOnClient
+         * @static
+         * @param {ICMsgClientMMSSetRatelimitPolicyOnClient=} [properties] Properties to set
+         * @returns {CMsgClientMMSSetRatelimitPolicyOnClient} CMsgClientMMSSetRatelimitPolicyOnClient instance
+         */
+        CMsgClientMMSSetRatelimitPolicyOnClient.create = function create(properties) {
+            return new CMsgClientMMSSetRatelimitPolicyOnClient(properties);
+        };
+    
+        /**
+         * Encodes the specified CMsgClientMMSSetRatelimitPolicyOnClient message. Does not implicitly {@link CMsgClientMMSSetRatelimitPolicyOnClient.verify|verify} messages.
+         * @function encode
+         * @memberof CMsgClientMMSSetRatelimitPolicyOnClient
+         * @static
+         * @param {ICMsgClientMMSSetRatelimitPolicyOnClient} message CMsgClientMMSSetRatelimitPolicyOnClient message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        CMsgClientMMSSetRatelimitPolicyOnClient.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.app_id != null && message.hasOwnProperty("app_id"))
+                writer.uint32(/* id 1, wireType 0 =*/8).uint32(message.app_id);
+            if (message.enable_rate_limits != null && message.hasOwnProperty("enable_rate_limits"))
+                writer.uint32(/* id 2, wireType 0 =*/16).bool(message.enable_rate_limits);
+            if (message.seconds_per_message != null && message.hasOwnProperty("seconds_per_message"))
+                writer.uint32(/* id 3, wireType 0 =*/24).int32(message.seconds_per_message);
+            if (message.milliseconds_per_data_update != null && message.hasOwnProperty("milliseconds_per_data_update"))
+                writer.uint32(/* id 4, wireType 0 =*/32).int32(message.milliseconds_per_data_update);
+            return writer;
+        };
+    
+        /**
+         * Encodes the specified CMsgClientMMSSetRatelimitPolicyOnClient message, length delimited. Does not implicitly {@link CMsgClientMMSSetRatelimitPolicyOnClient.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof CMsgClientMMSSetRatelimitPolicyOnClient
+         * @static
+         * @param {ICMsgClientMMSSetRatelimitPolicyOnClient} message CMsgClientMMSSetRatelimitPolicyOnClient message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        CMsgClientMMSSetRatelimitPolicyOnClient.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+    
+        /**
+         * Decodes a CMsgClientMMSSetRatelimitPolicyOnClient message from the specified reader or buffer.
+         * @function decode
+         * @memberof CMsgClientMMSSetRatelimitPolicyOnClient
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {CMsgClientMMSSetRatelimitPolicyOnClient} CMsgClientMMSSetRatelimitPolicyOnClient
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        CMsgClientMMSSetRatelimitPolicyOnClient.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.CMsgClientMMSSetRatelimitPolicyOnClient();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1:
+                    message.app_id = reader.uint32();
+                    break;
+                case 2:
+                    message.enable_rate_limits = reader.bool();
+                    break;
+                case 3:
+                    message.seconds_per_message = reader.int32();
+                    break;
+                case 4:
+                    message.milliseconds_per_data_update = reader.int32();
+                    break;
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+    
+        /**
+         * Decodes a CMsgClientMMSSetRatelimitPolicyOnClient message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof CMsgClientMMSSetRatelimitPolicyOnClient
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {CMsgClientMMSSetRatelimitPolicyOnClient} CMsgClientMMSSetRatelimitPolicyOnClient
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        CMsgClientMMSSetRatelimitPolicyOnClient.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+    
+        /**
+         * Verifies a CMsgClientMMSSetRatelimitPolicyOnClient message.
+         * @function verify
+         * @memberof CMsgClientMMSSetRatelimitPolicyOnClient
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        CMsgClientMMSSetRatelimitPolicyOnClient.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.app_id != null && message.hasOwnProperty("app_id"))
+                if (!$util.isInteger(message.app_id))
+                    return "app_id: integer expected";
+            if (message.enable_rate_limits != null && message.hasOwnProperty("enable_rate_limits"))
+                if (typeof message.enable_rate_limits !== "boolean")
+                    return "enable_rate_limits: boolean expected";
+            if (message.seconds_per_message != null && message.hasOwnProperty("seconds_per_message"))
+                if (!$util.isInteger(message.seconds_per_message))
+                    return "seconds_per_message: integer expected";
+            if (message.milliseconds_per_data_update != null && message.hasOwnProperty("milliseconds_per_data_update"))
+                if (!$util.isInteger(message.milliseconds_per_data_update))
+                    return "milliseconds_per_data_update: integer expected";
+            return null;
+        };
+    
+        /**
+         * Creates a CMsgClientMMSSetRatelimitPolicyOnClient message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof CMsgClientMMSSetRatelimitPolicyOnClient
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {CMsgClientMMSSetRatelimitPolicyOnClient} CMsgClientMMSSetRatelimitPolicyOnClient
+         */
+        CMsgClientMMSSetRatelimitPolicyOnClient.fromObject = function fromObject(object) {
+            if (object instanceof $root.CMsgClientMMSSetRatelimitPolicyOnClient)
+                return object;
+            var message = new $root.CMsgClientMMSSetRatelimitPolicyOnClient();
+            if (object.app_id != null)
+                message.app_id = object.app_id >>> 0;
+            if (object.enable_rate_limits != null)
+                message.enable_rate_limits = Boolean(object.enable_rate_limits);
+            if (object.seconds_per_message != null)
+                message.seconds_per_message = object.seconds_per_message | 0;
+            if (object.milliseconds_per_data_update != null)
+                message.milliseconds_per_data_update = object.milliseconds_per_data_update | 0;
+            return message;
+        };
+    
+        /**
+         * Creates a plain object from a CMsgClientMMSSetRatelimitPolicyOnClient message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof CMsgClientMMSSetRatelimitPolicyOnClient
+         * @static
+         * @param {CMsgClientMMSSetRatelimitPolicyOnClient} message CMsgClientMMSSetRatelimitPolicyOnClient
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        CMsgClientMMSSetRatelimitPolicyOnClient.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.defaults) {
+                object.app_id = 0;
+                object.enable_rate_limits = false;
+                object.seconds_per_message = 0;
+                object.milliseconds_per_data_update = 0;
+            }
+            if (message.app_id != null && message.hasOwnProperty("app_id"))
+                object.app_id = message.app_id;
+            if (message.enable_rate_limits != null && message.hasOwnProperty("enable_rate_limits"))
+                object.enable_rate_limits = message.enable_rate_limits;
+            if (message.seconds_per_message != null && message.hasOwnProperty("seconds_per_message"))
+                object.seconds_per_message = message.seconds_per_message;
+            if (message.milliseconds_per_data_update != null && message.hasOwnProperty("milliseconds_per_data_update"))
+                object.milliseconds_per_data_update = message.milliseconds_per_data_update;
+            return object;
+        };
+    
+        /**
+         * Converts this CMsgClientMMSSetRatelimitPolicyOnClient to JSON.
+         * @function toJSON
+         * @memberof CMsgClientMMSSetRatelimitPolicyOnClient
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        CMsgClientMMSSetRatelimitPolicyOnClient.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+    
+        return CMsgClientMMSSetRatelimitPolicyOnClient;
     })();
     
     $root.CMsgClientMMSCreateLobby = (function() {
@@ -16637,6 +16491,7 @@
          * @property {Uint8Array|null} [metadata] CMsgClientMMSLobbyData metadata
          * @property {Array.<CMsgClientMMSLobbyData.IMember>|null} [members] CMsgClientMMSLobbyData members
          * @property {number|null} [lobby_cellid] CMsgClientMMSLobbyData lobby_cellid
+         * @property {boolean|null} [owner_should_accept_changes] CMsgClientMMSLobbyData owner_should_accept_changes
          */
     
         /**
@@ -16736,6 +16591,14 @@
         CMsgClientMMSLobbyData.prototype.lobby_cellid = 0;
     
         /**
+         * CMsgClientMMSLobbyData owner_should_accept_changes.
+         * @member {boolean} owner_should_accept_changes
+         * @memberof CMsgClientMMSLobbyData
+         * @instance
+         */
+        CMsgClientMMSLobbyData.prototype.owner_should_accept_changes = false;
+    
+        /**
          * Creates a new CMsgClientMMSLobbyData instance using the specified properties.
          * @function create
          * @memberof CMsgClientMMSLobbyData
@@ -16780,6 +16643,8 @@
                     $root.CMsgClientMMSLobbyData.Member.encode(message.members[i], writer.uint32(/* id 9, wireType 2 =*/74).fork()).ldelim();
             if (message.lobby_cellid != null && message.hasOwnProperty("lobby_cellid"))
                 writer.uint32(/* id 10, wireType 0 =*/80).uint32(message.lobby_cellid);
+            if (message.owner_should_accept_changes != null && message.hasOwnProperty("owner_should_accept_changes"))
+                writer.uint32(/* id 11, wireType 0 =*/88).bool(message.owner_should_accept_changes);
             return writer;
         };
     
@@ -16845,6 +16710,9 @@
                     break;
                 case 10:
                     message.lobby_cellid = reader.uint32();
+                    break;
+                case 11:
+                    message.owner_should_accept_changes = reader.bool();
                     break;
                 default:
                     reader.skipType(tag & 7);
@@ -16917,6 +16785,9 @@
             if (message.lobby_cellid != null && message.hasOwnProperty("lobby_cellid"))
                 if (!$util.isInteger(message.lobby_cellid))
                     return "lobby_cellid: integer expected";
+            if (message.owner_should_accept_changes != null && message.hasOwnProperty("owner_should_accept_changes"))
+                if (typeof message.owner_should_accept_changes !== "boolean")
+                    return "owner_should_accept_changes: boolean expected";
             return null;
         };
     
@@ -16977,6 +16848,8 @@
             }
             if (object.lobby_cellid != null)
                 message.lobby_cellid = object.lobby_cellid >>> 0;
+            if (object.owner_should_accept_changes != null)
+                message.owner_should_accept_changes = Boolean(object.owner_should_accept_changes);
             return message;
         };
     
@@ -17019,6 +16892,7 @@
                         object.metadata = $util.newBuffer(object.metadata);
                 }
                 object.lobby_cellid = 0;
+                object.owner_should_accept_changes = false;
             }
             if (message.app_id != null && message.hasOwnProperty("app_id"))
                 object.app_id = message.app_id;
@@ -17049,6 +16923,8 @@
             }
             if (message.lobby_cellid != null && message.hasOwnProperty("lobby_cellid"))
                 object.lobby_cellid = message.lobby_cellid;
+            if (message.owner_should_accept_changes != null && message.hasOwnProperty("owner_should_accept_changes"))
+                object.owner_should_accept_changes = message.owner_should_accept_changes;
             return object;
         };
     
@@ -20101,6 +19977,543 @@
         return CMsgClientMMSInviteToLobby;
     })();
     
+    $root.CMsgClientMMSGetLobbyStatus = (function() {
+    
+        /**
+         * Properties of a CMsgClientMMSGetLobbyStatus.
+         * @exports ICMsgClientMMSGetLobbyStatus
+         * @interface ICMsgClientMMSGetLobbyStatus
+         * @property {number|null} [app_id] CMsgClientMMSGetLobbyStatus app_id
+         * @property {number|Long|null} [steam_id_lobby] CMsgClientMMSGetLobbyStatus steam_id_lobby
+         * @property {boolean|null} [claim_membership] CMsgClientMMSGetLobbyStatus claim_membership
+         * @property {boolean|null} [claim_ownership] CMsgClientMMSGetLobbyStatus claim_ownership
+         */
+    
+        /**
+         * Constructs a new CMsgClientMMSGetLobbyStatus.
+         * @exports CMsgClientMMSGetLobbyStatus
+         * @classdesc Represents a CMsgClientMMSGetLobbyStatus.
+         * @implements ICMsgClientMMSGetLobbyStatus
+         * @constructor
+         * @param {ICMsgClientMMSGetLobbyStatus=} [properties] Properties to set
+         */
+        function CMsgClientMMSGetLobbyStatus(properties) {
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+    
+        /**
+         * CMsgClientMMSGetLobbyStatus app_id.
+         * @member {number} app_id
+         * @memberof CMsgClientMMSGetLobbyStatus
+         * @instance
+         */
+        CMsgClientMMSGetLobbyStatus.prototype.app_id = 0;
+    
+        /**
+         * CMsgClientMMSGetLobbyStatus steam_id_lobby.
+         * @member {number|Long} steam_id_lobby
+         * @memberof CMsgClientMMSGetLobbyStatus
+         * @instance
+         */
+        CMsgClientMMSGetLobbyStatus.prototype.steam_id_lobby = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    
+        /**
+         * CMsgClientMMSGetLobbyStatus claim_membership.
+         * @member {boolean} claim_membership
+         * @memberof CMsgClientMMSGetLobbyStatus
+         * @instance
+         */
+        CMsgClientMMSGetLobbyStatus.prototype.claim_membership = false;
+    
+        /**
+         * CMsgClientMMSGetLobbyStatus claim_ownership.
+         * @member {boolean} claim_ownership
+         * @memberof CMsgClientMMSGetLobbyStatus
+         * @instance
+         */
+        CMsgClientMMSGetLobbyStatus.prototype.claim_ownership = false;
+    
+        /**
+         * Creates a new CMsgClientMMSGetLobbyStatus instance using the specified properties.
+         * @function create
+         * @memberof CMsgClientMMSGetLobbyStatus
+         * @static
+         * @param {ICMsgClientMMSGetLobbyStatus=} [properties] Properties to set
+         * @returns {CMsgClientMMSGetLobbyStatus} CMsgClientMMSGetLobbyStatus instance
+         */
+        CMsgClientMMSGetLobbyStatus.create = function create(properties) {
+            return new CMsgClientMMSGetLobbyStatus(properties);
+        };
+    
+        /**
+         * Encodes the specified CMsgClientMMSGetLobbyStatus message. Does not implicitly {@link CMsgClientMMSGetLobbyStatus.verify|verify} messages.
+         * @function encode
+         * @memberof CMsgClientMMSGetLobbyStatus
+         * @static
+         * @param {ICMsgClientMMSGetLobbyStatus} message CMsgClientMMSGetLobbyStatus message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        CMsgClientMMSGetLobbyStatus.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.app_id != null && message.hasOwnProperty("app_id"))
+                writer.uint32(/* id 1, wireType 0 =*/8).uint32(message.app_id);
+            if (message.steam_id_lobby != null && message.hasOwnProperty("steam_id_lobby"))
+                writer.uint32(/* id 2, wireType 1 =*/17).fixed64(message.steam_id_lobby);
+            if (message.claim_membership != null && message.hasOwnProperty("claim_membership"))
+                writer.uint32(/* id 3, wireType 0 =*/24).bool(message.claim_membership);
+            if (message.claim_ownership != null && message.hasOwnProperty("claim_ownership"))
+                writer.uint32(/* id 4, wireType 0 =*/32).bool(message.claim_ownership);
+            return writer;
+        };
+    
+        /**
+         * Encodes the specified CMsgClientMMSGetLobbyStatus message, length delimited. Does not implicitly {@link CMsgClientMMSGetLobbyStatus.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof CMsgClientMMSGetLobbyStatus
+         * @static
+         * @param {ICMsgClientMMSGetLobbyStatus} message CMsgClientMMSGetLobbyStatus message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        CMsgClientMMSGetLobbyStatus.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+    
+        /**
+         * Decodes a CMsgClientMMSGetLobbyStatus message from the specified reader or buffer.
+         * @function decode
+         * @memberof CMsgClientMMSGetLobbyStatus
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {CMsgClientMMSGetLobbyStatus} CMsgClientMMSGetLobbyStatus
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        CMsgClientMMSGetLobbyStatus.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.CMsgClientMMSGetLobbyStatus();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1:
+                    message.app_id = reader.uint32();
+                    break;
+                case 2:
+                    message.steam_id_lobby = reader.fixed64();
+                    break;
+                case 3:
+                    message.claim_membership = reader.bool();
+                    break;
+                case 4:
+                    message.claim_ownership = reader.bool();
+                    break;
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+    
+        /**
+         * Decodes a CMsgClientMMSGetLobbyStatus message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof CMsgClientMMSGetLobbyStatus
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {CMsgClientMMSGetLobbyStatus} CMsgClientMMSGetLobbyStatus
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        CMsgClientMMSGetLobbyStatus.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+    
+        /**
+         * Verifies a CMsgClientMMSGetLobbyStatus message.
+         * @function verify
+         * @memberof CMsgClientMMSGetLobbyStatus
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        CMsgClientMMSGetLobbyStatus.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.app_id != null && message.hasOwnProperty("app_id"))
+                if (!$util.isInteger(message.app_id))
+                    return "app_id: integer expected";
+            if (message.steam_id_lobby != null && message.hasOwnProperty("steam_id_lobby"))
+                if (!$util.isInteger(message.steam_id_lobby) && !(message.steam_id_lobby && $util.isInteger(message.steam_id_lobby.low) && $util.isInteger(message.steam_id_lobby.high)))
+                    return "steam_id_lobby: integer|Long expected";
+            if (message.claim_membership != null && message.hasOwnProperty("claim_membership"))
+                if (typeof message.claim_membership !== "boolean")
+                    return "claim_membership: boolean expected";
+            if (message.claim_ownership != null && message.hasOwnProperty("claim_ownership"))
+                if (typeof message.claim_ownership !== "boolean")
+                    return "claim_ownership: boolean expected";
+            return null;
+        };
+    
+        /**
+         * Creates a CMsgClientMMSGetLobbyStatus message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof CMsgClientMMSGetLobbyStatus
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {CMsgClientMMSGetLobbyStatus} CMsgClientMMSGetLobbyStatus
+         */
+        CMsgClientMMSGetLobbyStatus.fromObject = function fromObject(object) {
+            if (object instanceof $root.CMsgClientMMSGetLobbyStatus)
+                return object;
+            var message = new $root.CMsgClientMMSGetLobbyStatus();
+            if (object.app_id != null)
+                message.app_id = object.app_id >>> 0;
+            if (object.steam_id_lobby != null)
+                if ($util.Long)
+                    (message.steam_id_lobby = $util.Long.fromValue(object.steam_id_lobby)).unsigned = false;
+                else if (typeof object.steam_id_lobby === "string")
+                    message.steam_id_lobby = parseInt(object.steam_id_lobby, 10);
+                else if (typeof object.steam_id_lobby === "number")
+                    message.steam_id_lobby = object.steam_id_lobby;
+                else if (typeof object.steam_id_lobby === "object")
+                    message.steam_id_lobby = new $util.LongBits(object.steam_id_lobby.low >>> 0, object.steam_id_lobby.high >>> 0).toNumber();
+            if (object.claim_membership != null)
+                message.claim_membership = Boolean(object.claim_membership);
+            if (object.claim_ownership != null)
+                message.claim_ownership = Boolean(object.claim_ownership);
+            return message;
+        };
+    
+        /**
+         * Creates a plain object from a CMsgClientMMSGetLobbyStatus message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof CMsgClientMMSGetLobbyStatus
+         * @static
+         * @param {CMsgClientMMSGetLobbyStatus} message CMsgClientMMSGetLobbyStatus
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        CMsgClientMMSGetLobbyStatus.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.defaults) {
+                object.app_id = 0;
+                if ($util.Long) {
+                    var long = new $util.Long(0, 0, false);
+                    object.steam_id_lobby = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                } else
+                    object.steam_id_lobby = options.longs === String ? "0" : 0;
+                object.claim_membership = false;
+                object.claim_ownership = false;
+            }
+            if (message.app_id != null && message.hasOwnProperty("app_id"))
+                object.app_id = message.app_id;
+            if (message.steam_id_lobby != null && message.hasOwnProperty("steam_id_lobby"))
+                if (typeof message.steam_id_lobby === "number")
+                    object.steam_id_lobby = options.longs === String ? String(message.steam_id_lobby) : message.steam_id_lobby;
+                else
+                    object.steam_id_lobby = options.longs === String ? $util.Long.prototype.toString.call(message.steam_id_lobby) : options.longs === Number ? new $util.LongBits(message.steam_id_lobby.low >>> 0, message.steam_id_lobby.high >>> 0).toNumber() : message.steam_id_lobby;
+            if (message.claim_membership != null && message.hasOwnProperty("claim_membership"))
+                object.claim_membership = message.claim_membership;
+            if (message.claim_ownership != null && message.hasOwnProperty("claim_ownership"))
+                object.claim_ownership = message.claim_ownership;
+            return object;
+        };
+    
+        /**
+         * Converts this CMsgClientMMSGetLobbyStatus to JSON.
+         * @function toJSON
+         * @memberof CMsgClientMMSGetLobbyStatus
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        CMsgClientMMSGetLobbyStatus.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+    
+        return CMsgClientMMSGetLobbyStatus;
+    })();
+    
+    $root.CMsgClientMMSGetLobbyStatusResponse = (function() {
+    
+        /**
+         * Properties of a CMsgClientMMSGetLobbyStatusResponse.
+         * @exports ICMsgClientMMSGetLobbyStatusResponse
+         * @interface ICMsgClientMMSGetLobbyStatusResponse
+         * @property {number|null} [app_id] CMsgClientMMSGetLobbyStatusResponse app_id
+         * @property {number|Long|null} [steam_id_lobby] CMsgClientMMSGetLobbyStatusResponse steam_id_lobby
+         * @property {EMMSLobbyStatus|null} [lobby_status] CMsgClientMMSGetLobbyStatusResponse lobby_status
+         */
+    
+        /**
+         * Constructs a new CMsgClientMMSGetLobbyStatusResponse.
+         * @exports CMsgClientMMSGetLobbyStatusResponse
+         * @classdesc Represents a CMsgClientMMSGetLobbyStatusResponse.
+         * @implements ICMsgClientMMSGetLobbyStatusResponse
+         * @constructor
+         * @param {ICMsgClientMMSGetLobbyStatusResponse=} [properties] Properties to set
+         */
+        function CMsgClientMMSGetLobbyStatusResponse(properties) {
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+    
+        /**
+         * CMsgClientMMSGetLobbyStatusResponse app_id.
+         * @member {number} app_id
+         * @memberof CMsgClientMMSGetLobbyStatusResponse
+         * @instance
+         */
+        CMsgClientMMSGetLobbyStatusResponse.prototype.app_id = 0;
+    
+        /**
+         * CMsgClientMMSGetLobbyStatusResponse steam_id_lobby.
+         * @member {number|Long} steam_id_lobby
+         * @memberof CMsgClientMMSGetLobbyStatusResponse
+         * @instance
+         */
+        CMsgClientMMSGetLobbyStatusResponse.prototype.steam_id_lobby = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    
+        /**
+         * CMsgClientMMSGetLobbyStatusResponse lobby_status.
+         * @member {EMMSLobbyStatus} lobby_status
+         * @memberof CMsgClientMMSGetLobbyStatusResponse
+         * @instance
+         */
+        CMsgClientMMSGetLobbyStatusResponse.prototype.lobby_status = 0;
+    
+        /**
+         * Creates a new CMsgClientMMSGetLobbyStatusResponse instance using the specified properties.
+         * @function create
+         * @memberof CMsgClientMMSGetLobbyStatusResponse
+         * @static
+         * @param {ICMsgClientMMSGetLobbyStatusResponse=} [properties] Properties to set
+         * @returns {CMsgClientMMSGetLobbyStatusResponse} CMsgClientMMSGetLobbyStatusResponse instance
+         */
+        CMsgClientMMSGetLobbyStatusResponse.create = function create(properties) {
+            return new CMsgClientMMSGetLobbyStatusResponse(properties);
+        };
+    
+        /**
+         * Encodes the specified CMsgClientMMSGetLobbyStatusResponse message. Does not implicitly {@link CMsgClientMMSGetLobbyStatusResponse.verify|verify} messages.
+         * @function encode
+         * @memberof CMsgClientMMSGetLobbyStatusResponse
+         * @static
+         * @param {ICMsgClientMMSGetLobbyStatusResponse} message CMsgClientMMSGetLobbyStatusResponse message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        CMsgClientMMSGetLobbyStatusResponse.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.app_id != null && message.hasOwnProperty("app_id"))
+                writer.uint32(/* id 1, wireType 0 =*/8).uint32(message.app_id);
+            if (message.steam_id_lobby != null && message.hasOwnProperty("steam_id_lobby"))
+                writer.uint32(/* id 2, wireType 1 =*/17).fixed64(message.steam_id_lobby);
+            if (message.lobby_status != null && message.hasOwnProperty("lobby_status"))
+                writer.uint32(/* id 3, wireType 0 =*/24).int32(message.lobby_status);
+            return writer;
+        };
+    
+        /**
+         * Encodes the specified CMsgClientMMSGetLobbyStatusResponse message, length delimited. Does not implicitly {@link CMsgClientMMSGetLobbyStatusResponse.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof CMsgClientMMSGetLobbyStatusResponse
+         * @static
+         * @param {ICMsgClientMMSGetLobbyStatusResponse} message CMsgClientMMSGetLobbyStatusResponse message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        CMsgClientMMSGetLobbyStatusResponse.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+    
+        /**
+         * Decodes a CMsgClientMMSGetLobbyStatusResponse message from the specified reader or buffer.
+         * @function decode
+         * @memberof CMsgClientMMSGetLobbyStatusResponse
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {CMsgClientMMSGetLobbyStatusResponse} CMsgClientMMSGetLobbyStatusResponse
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        CMsgClientMMSGetLobbyStatusResponse.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.CMsgClientMMSGetLobbyStatusResponse();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1:
+                    message.app_id = reader.uint32();
+                    break;
+                case 2:
+                    message.steam_id_lobby = reader.fixed64();
+                    break;
+                case 3:
+                    message.lobby_status = reader.int32();
+                    break;
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+    
+        /**
+         * Decodes a CMsgClientMMSGetLobbyStatusResponse message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof CMsgClientMMSGetLobbyStatusResponse
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {CMsgClientMMSGetLobbyStatusResponse} CMsgClientMMSGetLobbyStatusResponse
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        CMsgClientMMSGetLobbyStatusResponse.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+    
+        /**
+         * Verifies a CMsgClientMMSGetLobbyStatusResponse message.
+         * @function verify
+         * @memberof CMsgClientMMSGetLobbyStatusResponse
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        CMsgClientMMSGetLobbyStatusResponse.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.app_id != null && message.hasOwnProperty("app_id"))
+                if (!$util.isInteger(message.app_id))
+                    return "app_id: integer expected";
+            if (message.steam_id_lobby != null && message.hasOwnProperty("steam_id_lobby"))
+                if (!$util.isInteger(message.steam_id_lobby) && !(message.steam_id_lobby && $util.isInteger(message.steam_id_lobby.low) && $util.isInteger(message.steam_id_lobby.high)))
+                    return "steam_id_lobby: integer|Long expected";
+            if (message.lobby_status != null && message.hasOwnProperty("lobby_status"))
+                switch (message.lobby_status) {
+                default:
+                    return "lobby_status: enum value expected";
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                    break;
+                }
+            return null;
+        };
+    
+        /**
+         * Creates a CMsgClientMMSGetLobbyStatusResponse message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof CMsgClientMMSGetLobbyStatusResponse
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {CMsgClientMMSGetLobbyStatusResponse} CMsgClientMMSGetLobbyStatusResponse
+         */
+        CMsgClientMMSGetLobbyStatusResponse.fromObject = function fromObject(object) {
+            if (object instanceof $root.CMsgClientMMSGetLobbyStatusResponse)
+                return object;
+            var message = new $root.CMsgClientMMSGetLobbyStatusResponse();
+            if (object.app_id != null)
+                message.app_id = object.app_id >>> 0;
+            if (object.steam_id_lobby != null)
+                if ($util.Long)
+                    (message.steam_id_lobby = $util.Long.fromValue(object.steam_id_lobby)).unsigned = false;
+                else if (typeof object.steam_id_lobby === "string")
+                    message.steam_id_lobby = parseInt(object.steam_id_lobby, 10);
+                else if (typeof object.steam_id_lobby === "number")
+                    message.steam_id_lobby = object.steam_id_lobby;
+                else if (typeof object.steam_id_lobby === "object")
+                    message.steam_id_lobby = new $util.LongBits(object.steam_id_lobby.low >>> 0, object.steam_id_lobby.high >>> 0).toNumber();
+            switch (object.lobby_status) {
+            case "k_EMMSLobbyStatusInvalid":
+            case 0:
+                message.lobby_status = 0;
+                break;
+            case "k_EMMSLobbyStatusExists":
+            case 1:
+                message.lobby_status = 1;
+                break;
+            case "k_EMMSLobbyStatusDoesNotExist":
+            case 2:
+                message.lobby_status = 2;
+                break;
+            case "k_EMMSLobbyStatusNotAMember":
+            case 3:
+                message.lobby_status = 3;
+                break;
+            }
+            return message;
+        };
+    
+        /**
+         * Creates a plain object from a CMsgClientMMSGetLobbyStatusResponse message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof CMsgClientMMSGetLobbyStatusResponse
+         * @static
+         * @param {CMsgClientMMSGetLobbyStatusResponse} message CMsgClientMMSGetLobbyStatusResponse
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        CMsgClientMMSGetLobbyStatusResponse.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.defaults) {
+                object.app_id = 0;
+                if ($util.Long) {
+                    var long = new $util.Long(0, 0, false);
+                    object.steam_id_lobby = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                } else
+                    object.steam_id_lobby = options.longs === String ? "0" : 0;
+                object.lobby_status = options.enums === String ? "k_EMMSLobbyStatusInvalid" : 0;
+            }
+            if (message.app_id != null && message.hasOwnProperty("app_id"))
+                object.app_id = message.app_id;
+            if (message.steam_id_lobby != null && message.hasOwnProperty("steam_id_lobby"))
+                if (typeof message.steam_id_lobby === "number")
+                    object.steam_id_lobby = options.longs === String ? String(message.steam_id_lobby) : message.steam_id_lobby;
+                else
+                    object.steam_id_lobby = options.longs === String ? $util.Long.prototype.toString.call(message.steam_id_lobby) : options.longs === Number ? new $util.LongBits(message.steam_id_lobby.low >>> 0, message.steam_id_lobby.high >>> 0).toNumber() : message.steam_id_lobby;
+            if (message.lobby_status != null && message.hasOwnProperty("lobby_status"))
+                object.lobby_status = options.enums === String ? $root.EMMSLobbyStatus[message.lobby_status] : message.lobby_status;
+            return object;
+        };
+    
+        /**
+         * Converts this CMsgClientMMSGetLobbyStatusResponse to JSON.
+         * @function toJSON
+         * @memberof CMsgClientMMSGetLobbyStatusResponse
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        CMsgClientMMSGetLobbyStatusResponse.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+    
+        return CMsgClientMMSGetLobbyStatusResponse;
+    })();
+    
     $root.CMsgClientInviteToGame = (function() {
     
         /**
@@ -20110,6 +20523,7 @@
          * @property {number|Long|null} [steam_id_dest] CMsgClientInviteToGame steam_id_dest
          * @property {number|Long|null} [steam_id_src] CMsgClientInviteToGame steam_id_src
          * @property {string|null} [connect_string] CMsgClientInviteToGame connect_string
+         * @property {string|null} [remote_play] CMsgClientInviteToGame remote_play
          */
     
         /**
@@ -20152,6 +20566,14 @@
         CMsgClientInviteToGame.prototype.connect_string = "";
     
         /**
+         * CMsgClientInviteToGame remote_play.
+         * @member {string} remote_play
+         * @memberof CMsgClientInviteToGame
+         * @instance
+         */
+        CMsgClientInviteToGame.prototype.remote_play = "";
+    
+        /**
          * Creates a new CMsgClientInviteToGame instance using the specified properties.
          * @function create
          * @memberof CMsgClientInviteToGame
@@ -20181,6 +20603,8 @@
                 writer.uint32(/* id 2, wireType 1 =*/17).fixed64(message.steam_id_src);
             if (message.connect_string != null && message.hasOwnProperty("connect_string"))
                 writer.uint32(/* id 3, wireType 2 =*/26).string(message.connect_string);
+            if (message.remote_play != null && message.hasOwnProperty("remote_play"))
+                writer.uint32(/* id 4, wireType 2 =*/34).string(message.remote_play);
             return writer;
         };
     
@@ -20223,6 +20647,9 @@
                     break;
                 case 3:
                     message.connect_string = reader.string();
+                    break;
+                case 4:
+                    message.remote_play = reader.string();
                     break;
                 default:
                     reader.skipType(tag & 7);
@@ -20268,6 +20695,9 @@
             if (message.connect_string != null && message.hasOwnProperty("connect_string"))
                 if (!$util.isString(message.connect_string))
                     return "connect_string: string expected";
+            if (message.remote_play != null && message.hasOwnProperty("remote_play"))
+                if (!$util.isString(message.remote_play))
+                    return "remote_play: string expected";
             return null;
         };
     
@@ -20303,6 +20733,8 @@
                     message.steam_id_src = new $util.LongBits(object.steam_id_src.low >>> 0, object.steam_id_src.high >>> 0).toNumber();
             if (object.connect_string != null)
                 message.connect_string = String(object.connect_string);
+            if (object.remote_play != null)
+                message.remote_play = String(object.remote_play);
             return message;
         };
     
@@ -20331,6 +20763,7 @@
                 } else
                     object.steam_id_src = options.longs === String ? "0" : 0;
                 object.connect_string = "";
+                object.remote_play = "";
             }
             if (message.steam_id_dest != null && message.hasOwnProperty("steam_id_dest"))
                 if (typeof message.steam_id_dest === "number")
@@ -20344,6 +20777,8 @@
                     object.steam_id_src = options.longs === String ? $util.Long.prototype.toString.call(message.steam_id_src) : options.longs === Number ? new $util.LongBits(message.steam_id_src.low >>> 0, message.steam_id_src.high >>> 0).toNumber() : message.steam_id_src;
             if (message.connect_string != null && message.hasOwnProperty("connect_string"))
                 object.connect_string = message.connect_string;
+            if (message.remote_play != null && message.hasOwnProperty("remote_play"))
+                object.remote_play = message.remote_play;
             return object;
         };
     
@@ -46035,6 +46470,652 @@
         return CMsgClientClanState;
     })();
     
+    $root.CMsgClientUnsignedInstallScript = (function() {
+    
+        /**
+         * Properties of a CMsgClientUnsignedInstallScript.
+         * @exports ICMsgClientUnsignedInstallScript
+         * @interface ICMsgClientUnsignedInstallScript
+         * @property {number|null} [app_id] CMsgClientUnsignedInstallScript app_id
+         * @property {string|null} [file_name] CMsgClientUnsignedInstallScript file_name
+         * @property {number|null} [file_size] CMsgClientUnsignedInstallScript file_size
+         * @property {boolean|null} [signature_broken] CMsgClientUnsignedInstallScript signature_broken
+         * @property {number|null} [depot_id] CMsgClientUnsignedInstallScript depot_id
+         * @property {number|Long|null} [manifest_id] CMsgClientUnsignedInstallScript manifest_id
+         * @property {number|null} [file_flags] CMsgClientUnsignedInstallScript file_flags
+         */
+    
+        /**
+         * Constructs a new CMsgClientUnsignedInstallScript.
+         * @exports CMsgClientUnsignedInstallScript
+         * @classdesc Represents a CMsgClientUnsignedInstallScript.
+         * @implements ICMsgClientUnsignedInstallScript
+         * @constructor
+         * @param {ICMsgClientUnsignedInstallScript=} [properties] Properties to set
+         */
+        function CMsgClientUnsignedInstallScript(properties) {
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+    
+        /**
+         * CMsgClientUnsignedInstallScript app_id.
+         * @member {number} app_id
+         * @memberof CMsgClientUnsignedInstallScript
+         * @instance
+         */
+        CMsgClientUnsignedInstallScript.prototype.app_id = 0;
+    
+        /**
+         * CMsgClientUnsignedInstallScript file_name.
+         * @member {string} file_name
+         * @memberof CMsgClientUnsignedInstallScript
+         * @instance
+         */
+        CMsgClientUnsignedInstallScript.prototype.file_name = "";
+    
+        /**
+         * CMsgClientUnsignedInstallScript file_size.
+         * @member {number} file_size
+         * @memberof CMsgClientUnsignedInstallScript
+         * @instance
+         */
+        CMsgClientUnsignedInstallScript.prototype.file_size = 0;
+    
+        /**
+         * CMsgClientUnsignedInstallScript signature_broken.
+         * @member {boolean} signature_broken
+         * @memberof CMsgClientUnsignedInstallScript
+         * @instance
+         */
+        CMsgClientUnsignedInstallScript.prototype.signature_broken = false;
+    
+        /**
+         * CMsgClientUnsignedInstallScript depot_id.
+         * @member {number} depot_id
+         * @memberof CMsgClientUnsignedInstallScript
+         * @instance
+         */
+        CMsgClientUnsignedInstallScript.prototype.depot_id = 0;
+    
+        /**
+         * CMsgClientUnsignedInstallScript manifest_id.
+         * @member {number|Long} manifest_id
+         * @memberof CMsgClientUnsignedInstallScript
+         * @instance
+         */
+        CMsgClientUnsignedInstallScript.prototype.manifest_id = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
+    
+        /**
+         * CMsgClientUnsignedInstallScript file_flags.
+         * @member {number} file_flags
+         * @memberof CMsgClientUnsignedInstallScript
+         * @instance
+         */
+        CMsgClientUnsignedInstallScript.prototype.file_flags = 0;
+    
+        /**
+         * Creates a new CMsgClientUnsignedInstallScript instance using the specified properties.
+         * @function create
+         * @memberof CMsgClientUnsignedInstallScript
+         * @static
+         * @param {ICMsgClientUnsignedInstallScript=} [properties] Properties to set
+         * @returns {CMsgClientUnsignedInstallScript} CMsgClientUnsignedInstallScript instance
+         */
+        CMsgClientUnsignedInstallScript.create = function create(properties) {
+            return new CMsgClientUnsignedInstallScript(properties);
+        };
+    
+        /**
+         * Encodes the specified CMsgClientUnsignedInstallScript message. Does not implicitly {@link CMsgClientUnsignedInstallScript.verify|verify} messages.
+         * @function encode
+         * @memberof CMsgClientUnsignedInstallScript
+         * @static
+         * @param {ICMsgClientUnsignedInstallScript} message CMsgClientUnsignedInstallScript message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        CMsgClientUnsignedInstallScript.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.app_id != null && message.hasOwnProperty("app_id"))
+                writer.uint32(/* id 1, wireType 0 =*/8).uint32(message.app_id);
+            if (message.file_name != null && message.hasOwnProperty("file_name"))
+                writer.uint32(/* id 2, wireType 2 =*/18).string(message.file_name);
+            if (message.file_size != null && message.hasOwnProperty("file_size"))
+                writer.uint32(/* id 3, wireType 0 =*/24).uint32(message.file_size);
+            if (message.signature_broken != null && message.hasOwnProperty("signature_broken"))
+                writer.uint32(/* id 4, wireType 0 =*/32).bool(message.signature_broken);
+            if (message.depot_id != null && message.hasOwnProperty("depot_id"))
+                writer.uint32(/* id 5, wireType 0 =*/40).uint32(message.depot_id);
+            if (message.manifest_id != null && message.hasOwnProperty("manifest_id"))
+                writer.uint32(/* id 6, wireType 0 =*/48).uint64(message.manifest_id);
+            if (message.file_flags != null && message.hasOwnProperty("file_flags"))
+                writer.uint32(/* id 7, wireType 0 =*/56).uint32(message.file_flags);
+            return writer;
+        };
+    
+        /**
+         * Encodes the specified CMsgClientUnsignedInstallScript message, length delimited. Does not implicitly {@link CMsgClientUnsignedInstallScript.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof CMsgClientUnsignedInstallScript
+         * @static
+         * @param {ICMsgClientUnsignedInstallScript} message CMsgClientUnsignedInstallScript message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        CMsgClientUnsignedInstallScript.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+    
+        /**
+         * Decodes a CMsgClientUnsignedInstallScript message from the specified reader or buffer.
+         * @function decode
+         * @memberof CMsgClientUnsignedInstallScript
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {CMsgClientUnsignedInstallScript} CMsgClientUnsignedInstallScript
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        CMsgClientUnsignedInstallScript.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.CMsgClientUnsignedInstallScript();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1:
+                    message.app_id = reader.uint32();
+                    break;
+                case 2:
+                    message.file_name = reader.string();
+                    break;
+                case 3:
+                    message.file_size = reader.uint32();
+                    break;
+                case 4:
+                    message.signature_broken = reader.bool();
+                    break;
+                case 5:
+                    message.depot_id = reader.uint32();
+                    break;
+                case 6:
+                    message.manifest_id = reader.uint64();
+                    break;
+                case 7:
+                    message.file_flags = reader.uint32();
+                    break;
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+    
+        /**
+         * Decodes a CMsgClientUnsignedInstallScript message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof CMsgClientUnsignedInstallScript
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {CMsgClientUnsignedInstallScript} CMsgClientUnsignedInstallScript
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        CMsgClientUnsignedInstallScript.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+    
+        /**
+         * Verifies a CMsgClientUnsignedInstallScript message.
+         * @function verify
+         * @memberof CMsgClientUnsignedInstallScript
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        CMsgClientUnsignedInstallScript.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.app_id != null && message.hasOwnProperty("app_id"))
+                if (!$util.isInteger(message.app_id))
+                    return "app_id: integer expected";
+            if (message.file_name != null && message.hasOwnProperty("file_name"))
+                if (!$util.isString(message.file_name))
+                    return "file_name: string expected";
+            if (message.file_size != null && message.hasOwnProperty("file_size"))
+                if (!$util.isInteger(message.file_size))
+                    return "file_size: integer expected";
+            if (message.signature_broken != null && message.hasOwnProperty("signature_broken"))
+                if (typeof message.signature_broken !== "boolean")
+                    return "signature_broken: boolean expected";
+            if (message.depot_id != null && message.hasOwnProperty("depot_id"))
+                if (!$util.isInteger(message.depot_id))
+                    return "depot_id: integer expected";
+            if (message.manifest_id != null && message.hasOwnProperty("manifest_id"))
+                if (!$util.isInteger(message.manifest_id) && !(message.manifest_id && $util.isInteger(message.manifest_id.low) && $util.isInteger(message.manifest_id.high)))
+                    return "manifest_id: integer|Long expected";
+            if (message.file_flags != null && message.hasOwnProperty("file_flags"))
+                if (!$util.isInteger(message.file_flags))
+                    return "file_flags: integer expected";
+            return null;
+        };
+    
+        /**
+         * Creates a CMsgClientUnsignedInstallScript message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof CMsgClientUnsignedInstallScript
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {CMsgClientUnsignedInstallScript} CMsgClientUnsignedInstallScript
+         */
+        CMsgClientUnsignedInstallScript.fromObject = function fromObject(object) {
+            if (object instanceof $root.CMsgClientUnsignedInstallScript)
+                return object;
+            var message = new $root.CMsgClientUnsignedInstallScript();
+            if (object.app_id != null)
+                message.app_id = object.app_id >>> 0;
+            if (object.file_name != null)
+                message.file_name = String(object.file_name);
+            if (object.file_size != null)
+                message.file_size = object.file_size >>> 0;
+            if (object.signature_broken != null)
+                message.signature_broken = Boolean(object.signature_broken);
+            if (object.depot_id != null)
+                message.depot_id = object.depot_id >>> 0;
+            if (object.manifest_id != null)
+                if ($util.Long)
+                    (message.manifest_id = $util.Long.fromValue(object.manifest_id)).unsigned = true;
+                else if (typeof object.manifest_id === "string")
+                    message.manifest_id = parseInt(object.manifest_id, 10);
+                else if (typeof object.manifest_id === "number")
+                    message.manifest_id = object.manifest_id;
+                else if (typeof object.manifest_id === "object")
+                    message.manifest_id = new $util.LongBits(object.manifest_id.low >>> 0, object.manifest_id.high >>> 0).toNumber(true);
+            if (object.file_flags != null)
+                message.file_flags = object.file_flags >>> 0;
+            return message;
+        };
+    
+        /**
+         * Creates a plain object from a CMsgClientUnsignedInstallScript message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof CMsgClientUnsignedInstallScript
+         * @static
+         * @param {CMsgClientUnsignedInstallScript} message CMsgClientUnsignedInstallScript
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        CMsgClientUnsignedInstallScript.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.defaults) {
+                object.app_id = 0;
+                object.file_name = "";
+                object.file_size = 0;
+                object.signature_broken = false;
+                object.depot_id = 0;
+                if ($util.Long) {
+                    var long = new $util.Long(0, 0, true);
+                    object.manifest_id = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                } else
+                    object.manifest_id = options.longs === String ? "0" : 0;
+                object.file_flags = 0;
+            }
+            if (message.app_id != null && message.hasOwnProperty("app_id"))
+                object.app_id = message.app_id;
+            if (message.file_name != null && message.hasOwnProperty("file_name"))
+                object.file_name = message.file_name;
+            if (message.file_size != null && message.hasOwnProperty("file_size"))
+                object.file_size = message.file_size;
+            if (message.signature_broken != null && message.hasOwnProperty("signature_broken"))
+                object.signature_broken = message.signature_broken;
+            if (message.depot_id != null && message.hasOwnProperty("depot_id"))
+                object.depot_id = message.depot_id;
+            if (message.manifest_id != null && message.hasOwnProperty("manifest_id"))
+                if (typeof message.manifest_id === "number")
+                    object.manifest_id = options.longs === String ? String(message.manifest_id) : message.manifest_id;
+                else
+                    object.manifest_id = options.longs === String ? $util.Long.prototype.toString.call(message.manifest_id) : options.longs === Number ? new $util.LongBits(message.manifest_id.low >>> 0, message.manifest_id.high >>> 0).toNumber(true) : message.manifest_id;
+            if (message.file_flags != null && message.hasOwnProperty("file_flags"))
+                object.file_flags = message.file_flags;
+            return object;
+        };
+    
+        /**
+         * Converts this CMsgClientUnsignedInstallScript to JSON.
+         * @function toJSON
+         * @memberof CMsgClientUnsignedInstallScript
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        CMsgClientUnsignedInstallScript.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+    
+        return CMsgClientUnsignedInstallScript;
+    })();
+    
+    /**
+     * EProtoClanEventType enum.
+     * @exports EProtoClanEventType
+     * @enum {string}
+     * @property {number} k_EClanOtherEvent=1 k_EClanOtherEvent value
+     * @property {number} k_EClanGameEvent=2 k_EClanGameEvent value
+     * @property {number} k_EClanPartyEvent=3 k_EClanPartyEvent value
+     * @property {number} k_EClanMeetingEvent=4 k_EClanMeetingEvent value
+     * @property {number} k_EClanSpecialCauseEvent=5 k_EClanSpecialCauseEvent value
+     * @property {number} k_EClanMusicAndArtsEvent=6 k_EClanMusicAndArtsEvent value
+     * @property {number} k_EClanSportsEvent=7 k_EClanSportsEvent value
+     * @property {number} k_EClanTripEvent=8 k_EClanTripEvent value
+     * @property {number} k_EClanChatEvent=9 k_EClanChatEvent value
+     * @property {number} k_EClanGameReleaseEvent=10 k_EClanGameReleaseEvent value
+     * @property {number} k_EClanBroadcastEvent=11 k_EClanBroadcastEvent value
+     * @property {number} k_EClanSmallUpdateEvent=12 k_EClanSmallUpdateEvent value
+     * @property {number} k_EClanPreAnnounceMajorUpdateEvent=13 k_EClanPreAnnounceMajorUpdateEvent value
+     * @property {number} k_EClanMajorUpdateEvent=14 k_EClanMajorUpdateEvent value
+     * @property {number} k_EClanDLCReleaseEvent=15 k_EClanDLCReleaseEvent value
+     * @property {number} k_EClanFutureReleaseEvent=16 k_EClanFutureReleaseEvent value
+     * @property {number} k_EClanESportTournamentStreamEvent=17 k_EClanESportTournamentStreamEvent value
+     * @property {number} k_EClanDevStreamEvent=18 k_EClanDevStreamEvent value
+     * @property {number} k_EClanFamousStreamEvent=19 k_EClanFamousStreamEvent value
+     * @property {number} k_EClanGameSalesEvent=20 k_EClanGameSalesEvent value
+     * @property {number} k_EClanGameItemSalesEvent=21 k_EClanGameItemSalesEvent value
+     * @property {number} k_EClanInGameBonusXPEvent=22 k_EClanInGameBonusXPEvent value
+     * @property {number} k_EClanInGameLootEvent=23 k_EClanInGameLootEvent value
+     * @property {number} k_EClanInGamePerksEvent=24 k_EClanInGamePerksEvent value
+     * @property {number} k_EClanInGameChallengeEvent=25 k_EClanInGameChallengeEvent value
+     * @property {number} k_EClanInGameContestEvent=26 k_EClanInGameContestEvent value
+     * @property {number} k_EClanIRLEvent=27 k_EClanIRLEvent value
+     * @property {number} k_EClanNewsEvent=28 k_EClanNewsEvent value
+     * @property {number} k_EClanBetaReleaseEvent=29 k_EClanBetaReleaseEvent value
+     * @property {number} k_EClanInGameContentReleaseEvent=30 k_EClanInGameContentReleaseEvent value
+     * @property {number} k_EClanFreeTrial=31 k_EClanFreeTrial value
+     * @property {number} k_EClanSeasonRelease=32 k_EClanSeasonRelease value
+     * @property {number} k_EClanSeasonUpdate=33 k_EClanSeasonUpdate value
+     */
+    $root.EProtoClanEventType = (function() {
+        var valuesById = {}, values = Object.create(valuesById);
+        values[valuesById[1] = "k_EClanOtherEvent"] = 1;
+        values[valuesById[2] = "k_EClanGameEvent"] = 2;
+        values[valuesById[3] = "k_EClanPartyEvent"] = 3;
+        values[valuesById[4] = "k_EClanMeetingEvent"] = 4;
+        values[valuesById[5] = "k_EClanSpecialCauseEvent"] = 5;
+        values[valuesById[6] = "k_EClanMusicAndArtsEvent"] = 6;
+        values[valuesById[7] = "k_EClanSportsEvent"] = 7;
+        values[valuesById[8] = "k_EClanTripEvent"] = 8;
+        values[valuesById[9] = "k_EClanChatEvent"] = 9;
+        values[valuesById[10] = "k_EClanGameReleaseEvent"] = 10;
+        values[valuesById[11] = "k_EClanBroadcastEvent"] = 11;
+        values[valuesById[12] = "k_EClanSmallUpdateEvent"] = 12;
+        values[valuesById[13] = "k_EClanPreAnnounceMajorUpdateEvent"] = 13;
+        values[valuesById[14] = "k_EClanMajorUpdateEvent"] = 14;
+        values[valuesById[15] = "k_EClanDLCReleaseEvent"] = 15;
+        values[valuesById[16] = "k_EClanFutureReleaseEvent"] = 16;
+        values[valuesById[17] = "k_EClanESportTournamentStreamEvent"] = 17;
+        values[valuesById[18] = "k_EClanDevStreamEvent"] = 18;
+        values[valuesById[19] = "k_EClanFamousStreamEvent"] = 19;
+        values[valuesById[20] = "k_EClanGameSalesEvent"] = 20;
+        values[valuesById[21] = "k_EClanGameItemSalesEvent"] = 21;
+        values[valuesById[22] = "k_EClanInGameBonusXPEvent"] = 22;
+        values[valuesById[23] = "k_EClanInGameLootEvent"] = 23;
+        values[valuesById[24] = "k_EClanInGamePerksEvent"] = 24;
+        values[valuesById[25] = "k_EClanInGameChallengeEvent"] = 25;
+        values[valuesById[26] = "k_EClanInGameContestEvent"] = 26;
+        values[valuesById[27] = "k_EClanIRLEvent"] = 27;
+        values[valuesById[28] = "k_EClanNewsEvent"] = 28;
+        values[valuesById[29] = "k_EClanBetaReleaseEvent"] = 29;
+        values[valuesById[30] = "k_EClanInGameContentReleaseEvent"] = 30;
+        values[valuesById[31] = "k_EClanFreeTrial"] = 31;
+        values[valuesById[32] = "k_EClanSeasonRelease"] = 32;
+        values[valuesById[33] = "k_EClanSeasonUpdate"] = 33;
+        return values;
+    })();
+    
+    $root.CMsgIPAddress = (function() {
+    
+        /**
+         * Properties of a CMsgIPAddress.
+         * @exports ICMsgIPAddress
+         * @interface ICMsgIPAddress
+         * @property {number|null} [v4] CMsgIPAddress v4
+         * @property {Uint8Array|null} [v6] CMsgIPAddress v6
+         */
+    
+        /**
+         * Constructs a new CMsgIPAddress.
+         * @exports CMsgIPAddress
+         * @classdesc Represents a CMsgIPAddress.
+         * @implements ICMsgIPAddress
+         * @constructor
+         * @param {ICMsgIPAddress=} [properties] Properties to set
+         */
+        function CMsgIPAddress(properties) {
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+    
+        /**
+         * CMsgIPAddress v4.
+         * @member {number} v4
+         * @memberof CMsgIPAddress
+         * @instance
+         */
+        CMsgIPAddress.prototype.v4 = 0;
+    
+        /**
+         * CMsgIPAddress v6.
+         * @member {Uint8Array} v6
+         * @memberof CMsgIPAddress
+         * @instance
+         */
+        CMsgIPAddress.prototype.v6 = $util.newBuffer([]);
+    
+        // OneOf field names bound to virtual getters and setters
+        var $oneOfFields;
+    
+        /**
+         * CMsgIPAddress ip.
+         * @member {"v4"|"v6"|undefined} ip
+         * @memberof CMsgIPAddress
+         * @instance
+         */
+        Object.defineProperty(CMsgIPAddress.prototype, "ip", {
+            get: $util.oneOfGetter($oneOfFields = ["v4", "v6"]),
+            set: $util.oneOfSetter($oneOfFields)
+        });
+    
+        /**
+         * Creates a new CMsgIPAddress instance using the specified properties.
+         * @function create
+         * @memberof CMsgIPAddress
+         * @static
+         * @param {ICMsgIPAddress=} [properties] Properties to set
+         * @returns {CMsgIPAddress} CMsgIPAddress instance
+         */
+        CMsgIPAddress.create = function create(properties) {
+            return new CMsgIPAddress(properties);
+        };
+    
+        /**
+         * Encodes the specified CMsgIPAddress message. Does not implicitly {@link CMsgIPAddress.verify|verify} messages.
+         * @function encode
+         * @memberof CMsgIPAddress
+         * @static
+         * @param {ICMsgIPAddress} message CMsgIPAddress message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        CMsgIPAddress.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.v4 != null && message.hasOwnProperty("v4"))
+                writer.uint32(/* id 1, wireType 5 =*/13).fixed32(message.v4);
+            if (message.v6 != null && message.hasOwnProperty("v6"))
+                writer.uint32(/* id 2, wireType 2 =*/18).bytes(message.v6);
+            return writer;
+        };
+    
+        /**
+         * Encodes the specified CMsgIPAddress message, length delimited. Does not implicitly {@link CMsgIPAddress.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof CMsgIPAddress
+         * @static
+         * @param {ICMsgIPAddress} message CMsgIPAddress message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        CMsgIPAddress.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+    
+        /**
+         * Decodes a CMsgIPAddress message from the specified reader or buffer.
+         * @function decode
+         * @memberof CMsgIPAddress
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {CMsgIPAddress} CMsgIPAddress
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        CMsgIPAddress.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.CMsgIPAddress();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1:
+                    message.v4 = reader.fixed32();
+                    break;
+                case 2:
+                    message.v6 = reader.bytes();
+                    break;
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+    
+        /**
+         * Decodes a CMsgIPAddress message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof CMsgIPAddress
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {CMsgIPAddress} CMsgIPAddress
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        CMsgIPAddress.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+    
+        /**
+         * Verifies a CMsgIPAddress message.
+         * @function verify
+         * @memberof CMsgIPAddress
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        CMsgIPAddress.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            var properties = {};
+            if (message.v4 != null && message.hasOwnProperty("v4")) {
+                properties.ip = 1;
+                if (!$util.isInteger(message.v4))
+                    return "v4: integer expected";
+            }
+            if (message.v6 != null && message.hasOwnProperty("v6")) {
+                if (properties.ip === 1)
+                    return "ip: multiple values";
+                properties.ip = 1;
+                if (!(message.v6 && typeof message.v6.length === "number" || $util.isString(message.v6)))
+                    return "v6: buffer expected";
+            }
+            return null;
+        };
+    
+        /**
+         * Creates a CMsgIPAddress message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof CMsgIPAddress
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {CMsgIPAddress} CMsgIPAddress
+         */
+        CMsgIPAddress.fromObject = function fromObject(object) {
+            if (object instanceof $root.CMsgIPAddress)
+                return object;
+            var message = new $root.CMsgIPAddress();
+            if (object.v4 != null)
+                message.v4 = object.v4 >>> 0;
+            if (object.v6 != null)
+                if (typeof object.v6 === "string")
+                    $util.base64.decode(object.v6, message.v6 = $util.newBuffer($util.base64.length(object.v6)), 0);
+                else if (object.v6.length)
+                    message.v6 = object.v6;
+            return message;
+        };
+    
+        /**
+         * Creates a plain object from a CMsgIPAddress message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof CMsgIPAddress
+         * @static
+         * @param {CMsgIPAddress} message CMsgIPAddress
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        CMsgIPAddress.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (message.v4 != null && message.hasOwnProperty("v4")) {
+                object.v4 = message.v4;
+                if (options.oneofs)
+                    object.ip = "v4";
+            }
+            if (message.v6 != null && message.hasOwnProperty("v6")) {
+                object.v6 = options.bytes === String ? $util.base64.encode(message.v6, 0, message.v6.length) : options.bytes === Array ? Array.prototype.slice.call(message.v6) : message.v6;
+                if (options.oneofs)
+                    object.ip = "v6";
+            }
+            return object;
+        };
+    
+        /**
+         * Converts this CMsgIPAddress to JSON.
+         * @function toJSON
+         * @memberof CMsgIPAddress
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        CMsgIPAddress.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+    
+        return CMsgIPAddress;
+    })();
+    
     $root.CMsgProtoBufHeader = (function() {
     
         /**
@@ -46050,7 +47131,6 @@
          * @property {number|null} [seq_num] CMsgProtoBufHeader seq_num
          * @property {number|null} [eresult] CMsgProtoBufHeader eresult
          * @property {string|null} [error_message] CMsgProtoBufHeader error_message
-         * @property {number|null} [ip] CMsgProtoBufHeader ip
          * @property {number|null} [auth_account_flags] CMsgProtoBufHeader auth_account_flags
          * @property {number|null} [token_source] CMsgProtoBufHeader token_source
          * @property {boolean|null} [admin_spoofing_user] CMsgProtoBufHeader admin_spoofing_user
@@ -46063,6 +47143,9 @@
          * @property {boolean|null} [is_from_external_source] CMsgProtoBufHeader is_from_external_source
          * @property {Array.<number>|null} [forward_to_sysid] CMsgProtoBufHeader forward_to_sysid
          * @property {number|null} [cm_sysid] CMsgProtoBufHeader cm_sysid
+         * @property {string|null} [wg_token] CMsgProtoBufHeader wg_token
+         * @property {number|null} [ip] CMsgProtoBufHeader ip
+         * @property {Uint8Array|null} [ip_v6] CMsgProtoBufHeader ip_v6
          */
     
         /**
@@ -46152,14 +47235,6 @@
          * @instance
          */
         CMsgProtoBufHeader.prototype.error_message = "";
-    
-        /**
-         * CMsgProtoBufHeader ip.
-         * @member {number} ip
-         * @memberof CMsgProtoBufHeader
-         * @instance
-         */
-        CMsgProtoBufHeader.prototype.ip = 0;
     
         /**
          * CMsgProtoBufHeader auth_account_flags.
@@ -46258,6 +47333,44 @@
         CMsgProtoBufHeader.prototype.cm_sysid = 0;
     
         /**
+         * CMsgProtoBufHeader wg_token.
+         * @member {string} wg_token
+         * @memberof CMsgProtoBufHeader
+         * @instance
+         */
+        CMsgProtoBufHeader.prototype.wg_token = "";
+    
+        /**
+         * CMsgProtoBufHeader ip.
+         * @member {number} ip
+         * @memberof CMsgProtoBufHeader
+         * @instance
+         */
+        CMsgProtoBufHeader.prototype.ip = 0;
+    
+        /**
+         * CMsgProtoBufHeader ip_v6.
+         * @member {Uint8Array} ip_v6
+         * @memberof CMsgProtoBufHeader
+         * @instance
+         */
+        CMsgProtoBufHeader.prototype.ip_v6 = $util.newBuffer([]);
+    
+        // OneOf field names bound to virtual getters and setters
+        var $oneOfFields;
+    
+        /**
+         * CMsgProtoBufHeader ip_addr.
+         * @member {"ip"|"ip_v6"|undefined} ip_addr
+         * @memberof CMsgProtoBufHeader
+         * @instance
+         */
+        Object.defineProperty(CMsgProtoBufHeader.prototype, "ip_addr", {
+            get: $util.oneOfGetter($oneOfFields = ["ip", "ip_v6"]),
+            set: $util.oneOfSetter($oneOfFields)
+        });
+    
+        /**
          * Creates a new CMsgProtoBufHeader instance using the specified properties.
          * @function create
          * @memberof CMsgProtoBufHeader
@@ -46326,6 +47439,10 @@
                     writer.uint32(/* id 27, wireType 0 =*/216).uint32(message.forward_to_sysid[i]);
             if (message.cm_sysid != null && message.hasOwnProperty("cm_sysid"))
                 writer.uint32(/* id 28, wireType 0 =*/224).uint32(message.cm_sysid);
+            if (message.ip_v6 != null && message.hasOwnProperty("ip_v6"))
+                writer.uint32(/* id 29, wireType 2 =*/234).bytes(message.ip_v6);
+            if (message.wg_token != null && message.hasOwnProperty("wg_token"))
+                writer.uint32(/* id 30, wireType 2 =*/242).string(message.wg_token);
             return writer;
         };
     
@@ -46387,9 +47504,6 @@
                 case 14:
                     message.error_message = reader.string();
                     break;
-                case 15:
-                    message.ip = reader.uint32();
-                    break;
                 case 16:
                     message.auth_account_flags = reader.uint32();
                     break;
@@ -46433,6 +47547,15 @@
                 case 28:
                     message.cm_sysid = reader.uint32();
                     break;
+                case 30:
+                    message.wg_token = reader.string();
+                    break;
+                case 15:
+                    message.ip = reader.uint32();
+                    break;
+                case 29:
+                    message.ip_v6 = reader.bytes();
+                    break;
                 default:
                     reader.skipType(tag & 7);
                     break;
@@ -46468,6 +47591,7 @@
         CMsgProtoBufHeader.verify = function verify(message) {
             if (typeof message !== "object" || message === null)
                 return "object expected";
+            var properties = {};
             if (message.steamid != null && message.hasOwnProperty("steamid"))
                 if (!$util.isInteger(message.steamid) && !(message.steamid && $util.isInteger(message.steamid.low) && $util.isInteger(message.steamid.high)))
                     return "steamid: integer|Long expected";
@@ -46495,9 +47619,6 @@
             if (message.error_message != null && message.hasOwnProperty("error_message"))
                 if (!$util.isString(message.error_message))
                     return "error_message: string expected";
-            if (message.ip != null && message.hasOwnProperty("ip"))
-                if (!$util.isInteger(message.ip))
-                    return "ip: integer expected";
             if (message.auth_account_flags != null && message.hasOwnProperty("auth_account_flags"))
                 if (!$util.isInteger(message.auth_account_flags))
                     return "auth_account_flags: integer expected";
@@ -46538,6 +47659,21 @@
             if (message.cm_sysid != null && message.hasOwnProperty("cm_sysid"))
                 if (!$util.isInteger(message.cm_sysid))
                     return "cm_sysid: integer expected";
+            if (message.wg_token != null && message.hasOwnProperty("wg_token"))
+                if (!$util.isString(message.wg_token))
+                    return "wg_token: string expected";
+            if (message.ip != null && message.hasOwnProperty("ip")) {
+                properties.ip_addr = 1;
+                if (!$util.isInteger(message.ip))
+                    return "ip: integer expected";
+            }
+            if (message.ip_v6 != null && message.hasOwnProperty("ip_v6")) {
+                if (properties.ip_addr === 1)
+                    return "ip_addr: multiple values";
+                properties.ip_addr = 1;
+                if (!(message.ip_v6 && typeof message.ip_v6.length === "number" || $util.isString(message.ip_v6)))
+                    return "ip_v6: buffer expected";
+            }
             return null;
         };
     
@@ -46592,8 +47728,6 @@
                 message.eresult = object.eresult | 0;
             if (object.error_message != null)
                 message.error_message = String(object.error_message);
-            if (object.ip != null)
-                message.ip = object.ip >>> 0;
             if (object.auth_account_flags != null)
                 message.auth_account_flags = object.auth_account_flags >>> 0;
             if (object.token_source != null)
@@ -46637,6 +47771,15 @@
             }
             if (object.cm_sysid != null)
                 message.cm_sysid = object.cm_sysid >>> 0;
+            if (object.wg_token != null)
+                message.wg_token = String(object.wg_token);
+            if (object.ip != null)
+                message.ip = object.ip >>> 0;
+            if (object.ip_v6 != null)
+                if (typeof object.ip_v6 === "string")
+                    $util.base64.decode(object.ip_v6, message.ip_v6 = $util.newBuffer($util.base64.length(object.ip_v6)), 0);
+                else if (object.ip_v6.length)
+                    message.ip_v6 = object.ip_v6;
             return message;
         };
     
@@ -46676,7 +47819,6 @@
                 object.target_job_name = "";
                 object.eresult = 2;
                 object.error_message = "";
-                object.ip = 0;
                 object.auth_account_flags = 0;
                 object.transport_error = 1;
                 if ($util.Long) {
@@ -46697,6 +47839,7 @@
                 object.webapi_key_id = 0;
                 object.is_from_external_source = false;
                 object.cm_sysid = 0;
+                object.wg_token = "";
             }
             if (message.steamid != null && message.hasOwnProperty("steamid"))
                 if (typeof message.steamid === "number")
@@ -46723,8 +47866,11 @@
                 object.eresult = message.eresult;
             if (message.error_message != null && message.hasOwnProperty("error_message"))
                 object.error_message = message.error_message;
-            if (message.ip != null && message.hasOwnProperty("ip"))
+            if (message.ip != null && message.hasOwnProperty("ip")) {
                 object.ip = message.ip;
+                if (options.oneofs)
+                    object.ip_addr = "ip";
+            }
             if (message.auth_account_flags != null && message.hasOwnProperty("auth_account_flags"))
                 object.auth_account_flags = message.auth_account_flags;
             if (message.transport_error != null && message.hasOwnProperty("transport_error"))
@@ -46760,6 +47906,13 @@
             }
             if (message.cm_sysid != null && message.hasOwnProperty("cm_sysid"))
                 object.cm_sysid = message.cm_sysid;
+            if (message.ip_v6 != null && message.hasOwnProperty("ip_v6")) {
+                object.ip_v6 = options.bytes === String ? $util.base64.encode(message.ip_v6, 0, message.ip_v6.length) : options.bytes === Array ? Array.prototype.slice.call(message.ip_v6) : message.ip_v6;
+                if (options.oneofs)
+                    object.ip_addr = "ip_v6";
+            }
+            if (message.wg_token != null && message.hasOwnProperty("wg_token"))
+                object.wg_token = message.wg_token;
             return object;
         };
     
@@ -49201,6 +50354,2136 @@
         };
     
         return CLocalizationToken;
+    })();
+    
+    $root.CClanEventUserNewsTuple = (function() {
+    
+        /**
+         * Properties of a CClanEventUserNewsTuple.
+         * @exports ICClanEventUserNewsTuple
+         * @interface ICClanEventUserNewsTuple
+         * @property {number|null} [clanid] CClanEventUserNewsTuple clanid
+         * @property {number|Long|null} [event_gid] CClanEventUserNewsTuple event_gid
+         * @property {number|Long|null} [announcement_gid] CClanEventUserNewsTuple announcement_gid
+         * @property {number|null} [rtime_start] CClanEventUserNewsTuple rtime_start
+         * @property {number|null} [rtime_end] CClanEventUserNewsTuple rtime_end
+         * @property {number|null} [priority_score] CClanEventUserNewsTuple priority_score
+         * @property {number|null} [type] CClanEventUserNewsTuple type
+         * @property {number|null} [clamp_range_slot] CClanEventUserNewsTuple clamp_range_slot
+         * @property {number|null} [appid] CClanEventUserNewsTuple appid
+         * @property {number|null} [rtime32_last_modified] CClanEventUserNewsTuple rtime32_last_modified
+         */
+    
+        /**
+         * Constructs a new CClanEventUserNewsTuple.
+         * @exports CClanEventUserNewsTuple
+         * @classdesc Represents a CClanEventUserNewsTuple.
+         * @implements ICClanEventUserNewsTuple
+         * @constructor
+         * @param {ICClanEventUserNewsTuple=} [properties] Properties to set
+         */
+        function CClanEventUserNewsTuple(properties) {
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+    
+        /**
+         * CClanEventUserNewsTuple clanid.
+         * @member {number} clanid
+         * @memberof CClanEventUserNewsTuple
+         * @instance
+         */
+        CClanEventUserNewsTuple.prototype.clanid = 0;
+    
+        /**
+         * CClanEventUserNewsTuple event_gid.
+         * @member {number|Long} event_gid
+         * @memberof CClanEventUserNewsTuple
+         * @instance
+         */
+        CClanEventUserNewsTuple.prototype.event_gid = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    
+        /**
+         * CClanEventUserNewsTuple announcement_gid.
+         * @member {number|Long} announcement_gid
+         * @memberof CClanEventUserNewsTuple
+         * @instance
+         */
+        CClanEventUserNewsTuple.prototype.announcement_gid = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    
+        /**
+         * CClanEventUserNewsTuple rtime_start.
+         * @member {number} rtime_start
+         * @memberof CClanEventUserNewsTuple
+         * @instance
+         */
+        CClanEventUserNewsTuple.prototype.rtime_start = 0;
+    
+        /**
+         * CClanEventUserNewsTuple rtime_end.
+         * @member {number} rtime_end
+         * @memberof CClanEventUserNewsTuple
+         * @instance
+         */
+        CClanEventUserNewsTuple.prototype.rtime_end = 0;
+    
+        /**
+         * CClanEventUserNewsTuple priority_score.
+         * @member {number} priority_score
+         * @memberof CClanEventUserNewsTuple
+         * @instance
+         */
+        CClanEventUserNewsTuple.prototype.priority_score = 0;
+    
+        /**
+         * CClanEventUserNewsTuple type.
+         * @member {number} type
+         * @memberof CClanEventUserNewsTuple
+         * @instance
+         */
+        CClanEventUserNewsTuple.prototype.type = 0;
+    
+        /**
+         * CClanEventUserNewsTuple clamp_range_slot.
+         * @member {number} clamp_range_slot
+         * @memberof CClanEventUserNewsTuple
+         * @instance
+         */
+        CClanEventUserNewsTuple.prototype.clamp_range_slot = 0;
+    
+        /**
+         * CClanEventUserNewsTuple appid.
+         * @member {number} appid
+         * @memberof CClanEventUserNewsTuple
+         * @instance
+         */
+        CClanEventUserNewsTuple.prototype.appid = 0;
+    
+        /**
+         * CClanEventUserNewsTuple rtime32_last_modified.
+         * @member {number} rtime32_last_modified
+         * @memberof CClanEventUserNewsTuple
+         * @instance
+         */
+        CClanEventUserNewsTuple.prototype.rtime32_last_modified = 0;
+    
+        /**
+         * Creates a new CClanEventUserNewsTuple instance using the specified properties.
+         * @function create
+         * @memberof CClanEventUserNewsTuple
+         * @static
+         * @param {ICClanEventUserNewsTuple=} [properties] Properties to set
+         * @returns {CClanEventUserNewsTuple} CClanEventUserNewsTuple instance
+         */
+        CClanEventUserNewsTuple.create = function create(properties) {
+            return new CClanEventUserNewsTuple(properties);
+        };
+    
+        /**
+         * Encodes the specified CClanEventUserNewsTuple message. Does not implicitly {@link CClanEventUserNewsTuple.verify|verify} messages.
+         * @function encode
+         * @memberof CClanEventUserNewsTuple
+         * @static
+         * @param {ICClanEventUserNewsTuple} message CClanEventUserNewsTuple message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        CClanEventUserNewsTuple.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.clanid != null && message.hasOwnProperty("clanid"))
+                writer.uint32(/* id 1, wireType 0 =*/8).uint32(message.clanid);
+            if (message.event_gid != null && message.hasOwnProperty("event_gid"))
+                writer.uint32(/* id 2, wireType 1 =*/17).fixed64(message.event_gid);
+            if (message.announcement_gid != null && message.hasOwnProperty("announcement_gid"))
+                writer.uint32(/* id 3, wireType 1 =*/25).fixed64(message.announcement_gid);
+            if (message.rtime_start != null && message.hasOwnProperty("rtime_start"))
+                writer.uint32(/* id 4, wireType 0 =*/32).uint32(message.rtime_start);
+            if (message.rtime_end != null && message.hasOwnProperty("rtime_end"))
+                writer.uint32(/* id 5, wireType 0 =*/40).uint32(message.rtime_end);
+            if (message.priority_score != null && message.hasOwnProperty("priority_score"))
+                writer.uint32(/* id 6, wireType 0 =*/48).uint32(message.priority_score);
+            if (message.type != null && message.hasOwnProperty("type"))
+                writer.uint32(/* id 7, wireType 0 =*/56).uint32(message.type);
+            if (message.clamp_range_slot != null && message.hasOwnProperty("clamp_range_slot"))
+                writer.uint32(/* id 8, wireType 0 =*/64).uint32(message.clamp_range_slot);
+            if (message.appid != null && message.hasOwnProperty("appid"))
+                writer.uint32(/* id 9, wireType 0 =*/72).uint32(message.appid);
+            if (message.rtime32_last_modified != null && message.hasOwnProperty("rtime32_last_modified"))
+                writer.uint32(/* id 10, wireType 0 =*/80).uint32(message.rtime32_last_modified);
+            return writer;
+        };
+    
+        /**
+         * Encodes the specified CClanEventUserNewsTuple message, length delimited. Does not implicitly {@link CClanEventUserNewsTuple.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof CClanEventUserNewsTuple
+         * @static
+         * @param {ICClanEventUserNewsTuple} message CClanEventUserNewsTuple message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        CClanEventUserNewsTuple.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+    
+        /**
+         * Decodes a CClanEventUserNewsTuple message from the specified reader or buffer.
+         * @function decode
+         * @memberof CClanEventUserNewsTuple
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {CClanEventUserNewsTuple} CClanEventUserNewsTuple
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        CClanEventUserNewsTuple.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.CClanEventUserNewsTuple();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1:
+                    message.clanid = reader.uint32();
+                    break;
+                case 2:
+                    message.event_gid = reader.fixed64();
+                    break;
+                case 3:
+                    message.announcement_gid = reader.fixed64();
+                    break;
+                case 4:
+                    message.rtime_start = reader.uint32();
+                    break;
+                case 5:
+                    message.rtime_end = reader.uint32();
+                    break;
+                case 6:
+                    message.priority_score = reader.uint32();
+                    break;
+                case 7:
+                    message.type = reader.uint32();
+                    break;
+                case 8:
+                    message.clamp_range_slot = reader.uint32();
+                    break;
+                case 9:
+                    message.appid = reader.uint32();
+                    break;
+                case 10:
+                    message.rtime32_last_modified = reader.uint32();
+                    break;
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+    
+        /**
+         * Decodes a CClanEventUserNewsTuple message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof CClanEventUserNewsTuple
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {CClanEventUserNewsTuple} CClanEventUserNewsTuple
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        CClanEventUserNewsTuple.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+    
+        /**
+         * Verifies a CClanEventUserNewsTuple message.
+         * @function verify
+         * @memberof CClanEventUserNewsTuple
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        CClanEventUserNewsTuple.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.clanid != null && message.hasOwnProperty("clanid"))
+                if (!$util.isInteger(message.clanid))
+                    return "clanid: integer expected";
+            if (message.event_gid != null && message.hasOwnProperty("event_gid"))
+                if (!$util.isInteger(message.event_gid) && !(message.event_gid && $util.isInteger(message.event_gid.low) && $util.isInteger(message.event_gid.high)))
+                    return "event_gid: integer|Long expected";
+            if (message.announcement_gid != null && message.hasOwnProperty("announcement_gid"))
+                if (!$util.isInteger(message.announcement_gid) && !(message.announcement_gid && $util.isInteger(message.announcement_gid.low) && $util.isInteger(message.announcement_gid.high)))
+                    return "announcement_gid: integer|Long expected";
+            if (message.rtime_start != null && message.hasOwnProperty("rtime_start"))
+                if (!$util.isInteger(message.rtime_start))
+                    return "rtime_start: integer expected";
+            if (message.rtime_end != null && message.hasOwnProperty("rtime_end"))
+                if (!$util.isInteger(message.rtime_end))
+                    return "rtime_end: integer expected";
+            if (message.priority_score != null && message.hasOwnProperty("priority_score"))
+                if (!$util.isInteger(message.priority_score))
+                    return "priority_score: integer expected";
+            if (message.type != null && message.hasOwnProperty("type"))
+                if (!$util.isInteger(message.type))
+                    return "type: integer expected";
+            if (message.clamp_range_slot != null && message.hasOwnProperty("clamp_range_slot"))
+                if (!$util.isInteger(message.clamp_range_slot))
+                    return "clamp_range_slot: integer expected";
+            if (message.appid != null && message.hasOwnProperty("appid"))
+                if (!$util.isInteger(message.appid))
+                    return "appid: integer expected";
+            if (message.rtime32_last_modified != null && message.hasOwnProperty("rtime32_last_modified"))
+                if (!$util.isInteger(message.rtime32_last_modified))
+                    return "rtime32_last_modified: integer expected";
+            return null;
+        };
+    
+        /**
+         * Creates a CClanEventUserNewsTuple message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof CClanEventUserNewsTuple
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {CClanEventUserNewsTuple} CClanEventUserNewsTuple
+         */
+        CClanEventUserNewsTuple.fromObject = function fromObject(object) {
+            if (object instanceof $root.CClanEventUserNewsTuple)
+                return object;
+            var message = new $root.CClanEventUserNewsTuple();
+            if (object.clanid != null)
+                message.clanid = object.clanid >>> 0;
+            if (object.event_gid != null)
+                if ($util.Long)
+                    (message.event_gid = $util.Long.fromValue(object.event_gid)).unsigned = false;
+                else if (typeof object.event_gid === "string")
+                    message.event_gid = parseInt(object.event_gid, 10);
+                else if (typeof object.event_gid === "number")
+                    message.event_gid = object.event_gid;
+                else if (typeof object.event_gid === "object")
+                    message.event_gid = new $util.LongBits(object.event_gid.low >>> 0, object.event_gid.high >>> 0).toNumber();
+            if (object.announcement_gid != null)
+                if ($util.Long)
+                    (message.announcement_gid = $util.Long.fromValue(object.announcement_gid)).unsigned = false;
+                else if (typeof object.announcement_gid === "string")
+                    message.announcement_gid = parseInt(object.announcement_gid, 10);
+                else if (typeof object.announcement_gid === "number")
+                    message.announcement_gid = object.announcement_gid;
+                else if (typeof object.announcement_gid === "object")
+                    message.announcement_gid = new $util.LongBits(object.announcement_gid.low >>> 0, object.announcement_gid.high >>> 0).toNumber();
+            if (object.rtime_start != null)
+                message.rtime_start = object.rtime_start >>> 0;
+            if (object.rtime_end != null)
+                message.rtime_end = object.rtime_end >>> 0;
+            if (object.priority_score != null)
+                message.priority_score = object.priority_score >>> 0;
+            if (object.type != null)
+                message.type = object.type >>> 0;
+            if (object.clamp_range_slot != null)
+                message.clamp_range_slot = object.clamp_range_slot >>> 0;
+            if (object.appid != null)
+                message.appid = object.appid >>> 0;
+            if (object.rtime32_last_modified != null)
+                message.rtime32_last_modified = object.rtime32_last_modified >>> 0;
+            return message;
+        };
+    
+        /**
+         * Creates a plain object from a CClanEventUserNewsTuple message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof CClanEventUserNewsTuple
+         * @static
+         * @param {CClanEventUserNewsTuple} message CClanEventUserNewsTuple
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        CClanEventUserNewsTuple.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.defaults) {
+                object.clanid = 0;
+                if ($util.Long) {
+                    var long = new $util.Long(0, 0, false);
+                    object.event_gid = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                } else
+                    object.event_gid = options.longs === String ? "0" : 0;
+                if ($util.Long) {
+                    var long = new $util.Long(0, 0, false);
+                    object.announcement_gid = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                } else
+                    object.announcement_gid = options.longs === String ? "0" : 0;
+                object.rtime_start = 0;
+                object.rtime_end = 0;
+                object.priority_score = 0;
+                object.type = 0;
+                object.clamp_range_slot = 0;
+                object.appid = 0;
+                object.rtime32_last_modified = 0;
+            }
+            if (message.clanid != null && message.hasOwnProperty("clanid"))
+                object.clanid = message.clanid;
+            if (message.event_gid != null && message.hasOwnProperty("event_gid"))
+                if (typeof message.event_gid === "number")
+                    object.event_gid = options.longs === String ? String(message.event_gid) : message.event_gid;
+                else
+                    object.event_gid = options.longs === String ? $util.Long.prototype.toString.call(message.event_gid) : options.longs === Number ? new $util.LongBits(message.event_gid.low >>> 0, message.event_gid.high >>> 0).toNumber() : message.event_gid;
+            if (message.announcement_gid != null && message.hasOwnProperty("announcement_gid"))
+                if (typeof message.announcement_gid === "number")
+                    object.announcement_gid = options.longs === String ? String(message.announcement_gid) : message.announcement_gid;
+                else
+                    object.announcement_gid = options.longs === String ? $util.Long.prototype.toString.call(message.announcement_gid) : options.longs === Number ? new $util.LongBits(message.announcement_gid.low >>> 0, message.announcement_gid.high >>> 0).toNumber() : message.announcement_gid;
+            if (message.rtime_start != null && message.hasOwnProperty("rtime_start"))
+                object.rtime_start = message.rtime_start;
+            if (message.rtime_end != null && message.hasOwnProperty("rtime_end"))
+                object.rtime_end = message.rtime_end;
+            if (message.priority_score != null && message.hasOwnProperty("priority_score"))
+                object.priority_score = message.priority_score;
+            if (message.type != null && message.hasOwnProperty("type"))
+                object.type = message.type;
+            if (message.clamp_range_slot != null && message.hasOwnProperty("clamp_range_slot"))
+                object.clamp_range_slot = message.clamp_range_slot;
+            if (message.appid != null && message.hasOwnProperty("appid"))
+                object.appid = message.appid;
+            if (message.rtime32_last_modified != null && message.hasOwnProperty("rtime32_last_modified"))
+                object.rtime32_last_modified = message.rtime32_last_modified;
+            return object;
+        };
+    
+        /**
+         * Converts this CClanEventUserNewsTuple to JSON.
+         * @function toJSON
+         * @memberof CClanEventUserNewsTuple
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        CClanEventUserNewsTuple.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+    
+        return CClanEventUserNewsTuple;
+    })();
+    
+    $root.CClanMatchEventByRange = (function() {
+    
+        /**
+         * Properties of a CClanMatchEventByRange.
+         * @exports ICClanMatchEventByRange
+         * @interface ICClanMatchEventByRange
+         * @property {number|null} [rtime_before] CClanMatchEventByRange rtime_before
+         * @property {number|null} [rtime_after] CClanMatchEventByRange rtime_after
+         * @property {number|null} [qualified] CClanMatchEventByRange qualified
+         * @property {Array.<ICClanEventUserNewsTuple>|null} [events] CClanMatchEventByRange events
+         */
+    
+        /**
+         * Constructs a new CClanMatchEventByRange.
+         * @exports CClanMatchEventByRange
+         * @classdesc Represents a CClanMatchEventByRange.
+         * @implements ICClanMatchEventByRange
+         * @constructor
+         * @param {ICClanMatchEventByRange=} [properties] Properties to set
+         */
+        function CClanMatchEventByRange(properties) {
+            this.events = [];
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+    
+        /**
+         * CClanMatchEventByRange rtime_before.
+         * @member {number} rtime_before
+         * @memberof CClanMatchEventByRange
+         * @instance
+         */
+        CClanMatchEventByRange.prototype.rtime_before = 0;
+    
+        /**
+         * CClanMatchEventByRange rtime_after.
+         * @member {number} rtime_after
+         * @memberof CClanMatchEventByRange
+         * @instance
+         */
+        CClanMatchEventByRange.prototype.rtime_after = 0;
+    
+        /**
+         * CClanMatchEventByRange qualified.
+         * @member {number} qualified
+         * @memberof CClanMatchEventByRange
+         * @instance
+         */
+        CClanMatchEventByRange.prototype.qualified = 0;
+    
+        /**
+         * CClanMatchEventByRange events.
+         * @member {Array.<ICClanEventUserNewsTuple>} events
+         * @memberof CClanMatchEventByRange
+         * @instance
+         */
+        CClanMatchEventByRange.prototype.events = $util.emptyArray;
+    
+        /**
+         * Creates a new CClanMatchEventByRange instance using the specified properties.
+         * @function create
+         * @memberof CClanMatchEventByRange
+         * @static
+         * @param {ICClanMatchEventByRange=} [properties] Properties to set
+         * @returns {CClanMatchEventByRange} CClanMatchEventByRange instance
+         */
+        CClanMatchEventByRange.create = function create(properties) {
+            return new CClanMatchEventByRange(properties);
+        };
+    
+        /**
+         * Encodes the specified CClanMatchEventByRange message. Does not implicitly {@link CClanMatchEventByRange.verify|verify} messages.
+         * @function encode
+         * @memberof CClanMatchEventByRange
+         * @static
+         * @param {ICClanMatchEventByRange} message CClanMatchEventByRange message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        CClanMatchEventByRange.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.rtime_before != null && message.hasOwnProperty("rtime_before"))
+                writer.uint32(/* id 1, wireType 0 =*/8).uint32(message.rtime_before);
+            if (message.rtime_after != null && message.hasOwnProperty("rtime_after"))
+                writer.uint32(/* id 2, wireType 0 =*/16).uint32(message.rtime_after);
+            if (message.qualified != null && message.hasOwnProperty("qualified"))
+                writer.uint32(/* id 3, wireType 0 =*/24).uint32(message.qualified);
+            if (message.events != null && message.events.length)
+                for (var i = 0; i < message.events.length; ++i)
+                    $root.CClanEventUserNewsTuple.encode(message.events[i], writer.uint32(/* id 4, wireType 2 =*/34).fork()).ldelim();
+            return writer;
+        };
+    
+        /**
+         * Encodes the specified CClanMatchEventByRange message, length delimited. Does not implicitly {@link CClanMatchEventByRange.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof CClanMatchEventByRange
+         * @static
+         * @param {ICClanMatchEventByRange} message CClanMatchEventByRange message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        CClanMatchEventByRange.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+    
+        /**
+         * Decodes a CClanMatchEventByRange message from the specified reader or buffer.
+         * @function decode
+         * @memberof CClanMatchEventByRange
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {CClanMatchEventByRange} CClanMatchEventByRange
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        CClanMatchEventByRange.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.CClanMatchEventByRange();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1:
+                    message.rtime_before = reader.uint32();
+                    break;
+                case 2:
+                    message.rtime_after = reader.uint32();
+                    break;
+                case 3:
+                    message.qualified = reader.uint32();
+                    break;
+                case 4:
+                    if (!(message.events && message.events.length))
+                        message.events = [];
+                    message.events.push($root.CClanEventUserNewsTuple.decode(reader, reader.uint32()));
+                    break;
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+    
+        /**
+         * Decodes a CClanMatchEventByRange message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof CClanMatchEventByRange
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {CClanMatchEventByRange} CClanMatchEventByRange
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        CClanMatchEventByRange.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+    
+        /**
+         * Verifies a CClanMatchEventByRange message.
+         * @function verify
+         * @memberof CClanMatchEventByRange
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        CClanMatchEventByRange.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.rtime_before != null && message.hasOwnProperty("rtime_before"))
+                if (!$util.isInteger(message.rtime_before))
+                    return "rtime_before: integer expected";
+            if (message.rtime_after != null && message.hasOwnProperty("rtime_after"))
+                if (!$util.isInteger(message.rtime_after))
+                    return "rtime_after: integer expected";
+            if (message.qualified != null && message.hasOwnProperty("qualified"))
+                if (!$util.isInteger(message.qualified))
+                    return "qualified: integer expected";
+            if (message.events != null && message.hasOwnProperty("events")) {
+                if (!Array.isArray(message.events))
+                    return "events: array expected";
+                for (var i = 0; i < message.events.length; ++i) {
+                    var error = $root.CClanEventUserNewsTuple.verify(message.events[i]);
+                    if (error)
+                        return "events." + error;
+                }
+            }
+            return null;
+        };
+    
+        /**
+         * Creates a CClanMatchEventByRange message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof CClanMatchEventByRange
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {CClanMatchEventByRange} CClanMatchEventByRange
+         */
+        CClanMatchEventByRange.fromObject = function fromObject(object) {
+            if (object instanceof $root.CClanMatchEventByRange)
+                return object;
+            var message = new $root.CClanMatchEventByRange();
+            if (object.rtime_before != null)
+                message.rtime_before = object.rtime_before >>> 0;
+            if (object.rtime_after != null)
+                message.rtime_after = object.rtime_after >>> 0;
+            if (object.qualified != null)
+                message.qualified = object.qualified >>> 0;
+            if (object.events) {
+                if (!Array.isArray(object.events))
+                    throw TypeError(".CClanMatchEventByRange.events: array expected");
+                message.events = [];
+                for (var i = 0; i < object.events.length; ++i) {
+                    if (typeof object.events[i] !== "object")
+                        throw TypeError(".CClanMatchEventByRange.events: object expected");
+                    message.events[i] = $root.CClanEventUserNewsTuple.fromObject(object.events[i]);
+                }
+            }
+            return message;
+        };
+    
+        /**
+         * Creates a plain object from a CClanMatchEventByRange message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof CClanMatchEventByRange
+         * @static
+         * @param {CClanMatchEventByRange} message CClanMatchEventByRange
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        CClanMatchEventByRange.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.arrays || options.defaults)
+                object.events = [];
+            if (options.defaults) {
+                object.rtime_before = 0;
+                object.rtime_after = 0;
+                object.qualified = 0;
+            }
+            if (message.rtime_before != null && message.hasOwnProperty("rtime_before"))
+                object.rtime_before = message.rtime_before;
+            if (message.rtime_after != null && message.hasOwnProperty("rtime_after"))
+                object.rtime_after = message.rtime_after;
+            if (message.qualified != null && message.hasOwnProperty("qualified"))
+                object.qualified = message.qualified;
+            if (message.events && message.events.length) {
+                object.events = [];
+                for (var j = 0; j < message.events.length; ++j)
+                    object.events[j] = $root.CClanEventUserNewsTuple.toObject(message.events[j], options);
+            }
+            return object;
+        };
+    
+        /**
+         * Converts this CClanMatchEventByRange to JSON.
+         * @function toJSON
+         * @memberof CClanMatchEventByRange
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        CClanMatchEventByRange.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+    
+        return CClanMatchEventByRange;
+    })();
+    
+    $root.CCommunity_ClanAnnouncementInfo = (function() {
+    
+        /**
+         * Properties of a CCommunity_ClanAnnouncementInfo.
+         * @exports ICCommunity_ClanAnnouncementInfo
+         * @interface ICCommunity_ClanAnnouncementInfo
+         * @property {number|Long|null} [gid] CCommunity_ClanAnnouncementInfo gid
+         * @property {number|Long|null} [clanid] CCommunity_ClanAnnouncementInfo clanid
+         * @property {number|Long|null} [posterid] CCommunity_ClanAnnouncementInfo posterid
+         * @property {string|null} [headline] CCommunity_ClanAnnouncementInfo headline
+         * @property {number|null} [posttime] CCommunity_ClanAnnouncementInfo posttime
+         * @property {number|null} [updatetime] CCommunity_ClanAnnouncementInfo updatetime
+         * @property {string|null} [body] CCommunity_ClanAnnouncementInfo body
+         * @property {number|null} [commentcount] CCommunity_ClanAnnouncementInfo commentcount
+         * @property {Array.<string>|null} [tags] CCommunity_ClanAnnouncementInfo tags
+         * @property {number|null} [language] CCommunity_ClanAnnouncementInfo language
+         * @property {boolean|null} [hidden] CCommunity_ClanAnnouncementInfo hidden
+         * @property {number|Long|null} [forum_topic_id] CCommunity_ClanAnnouncementInfo forum_topic_id
+         */
+    
+        /**
+         * Constructs a new CCommunity_ClanAnnouncementInfo.
+         * @exports CCommunity_ClanAnnouncementInfo
+         * @classdesc Represents a CCommunity_ClanAnnouncementInfo.
+         * @implements ICCommunity_ClanAnnouncementInfo
+         * @constructor
+         * @param {ICCommunity_ClanAnnouncementInfo=} [properties] Properties to set
+         */
+        function CCommunity_ClanAnnouncementInfo(properties) {
+            this.tags = [];
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+    
+        /**
+         * CCommunity_ClanAnnouncementInfo gid.
+         * @member {number|Long} gid
+         * @memberof CCommunity_ClanAnnouncementInfo
+         * @instance
+         */
+        CCommunity_ClanAnnouncementInfo.prototype.gid = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
+    
+        /**
+         * CCommunity_ClanAnnouncementInfo clanid.
+         * @member {number|Long} clanid
+         * @memberof CCommunity_ClanAnnouncementInfo
+         * @instance
+         */
+        CCommunity_ClanAnnouncementInfo.prototype.clanid = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
+    
+        /**
+         * CCommunity_ClanAnnouncementInfo posterid.
+         * @member {number|Long} posterid
+         * @memberof CCommunity_ClanAnnouncementInfo
+         * @instance
+         */
+        CCommunity_ClanAnnouncementInfo.prototype.posterid = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
+    
+        /**
+         * CCommunity_ClanAnnouncementInfo headline.
+         * @member {string} headline
+         * @memberof CCommunity_ClanAnnouncementInfo
+         * @instance
+         */
+        CCommunity_ClanAnnouncementInfo.prototype.headline = "";
+    
+        /**
+         * CCommunity_ClanAnnouncementInfo posttime.
+         * @member {number} posttime
+         * @memberof CCommunity_ClanAnnouncementInfo
+         * @instance
+         */
+        CCommunity_ClanAnnouncementInfo.prototype.posttime = 0;
+    
+        /**
+         * CCommunity_ClanAnnouncementInfo updatetime.
+         * @member {number} updatetime
+         * @memberof CCommunity_ClanAnnouncementInfo
+         * @instance
+         */
+        CCommunity_ClanAnnouncementInfo.prototype.updatetime = 0;
+    
+        /**
+         * CCommunity_ClanAnnouncementInfo body.
+         * @member {string} body
+         * @memberof CCommunity_ClanAnnouncementInfo
+         * @instance
+         */
+        CCommunity_ClanAnnouncementInfo.prototype.body = "";
+    
+        /**
+         * CCommunity_ClanAnnouncementInfo commentcount.
+         * @member {number} commentcount
+         * @memberof CCommunity_ClanAnnouncementInfo
+         * @instance
+         */
+        CCommunity_ClanAnnouncementInfo.prototype.commentcount = 0;
+    
+        /**
+         * CCommunity_ClanAnnouncementInfo tags.
+         * @member {Array.<string>} tags
+         * @memberof CCommunity_ClanAnnouncementInfo
+         * @instance
+         */
+        CCommunity_ClanAnnouncementInfo.prototype.tags = $util.emptyArray;
+    
+        /**
+         * CCommunity_ClanAnnouncementInfo language.
+         * @member {number} language
+         * @memberof CCommunity_ClanAnnouncementInfo
+         * @instance
+         */
+        CCommunity_ClanAnnouncementInfo.prototype.language = 0;
+    
+        /**
+         * CCommunity_ClanAnnouncementInfo hidden.
+         * @member {boolean} hidden
+         * @memberof CCommunity_ClanAnnouncementInfo
+         * @instance
+         */
+        CCommunity_ClanAnnouncementInfo.prototype.hidden = false;
+    
+        /**
+         * CCommunity_ClanAnnouncementInfo forum_topic_id.
+         * @member {number|Long} forum_topic_id
+         * @memberof CCommunity_ClanAnnouncementInfo
+         * @instance
+         */
+        CCommunity_ClanAnnouncementInfo.prototype.forum_topic_id = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    
+        /**
+         * Creates a new CCommunity_ClanAnnouncementInfo instance using the specified properties.
+         * @function create
+         * @memberof CCommunity_ClanAnnouncementInfo
+         * @static
+         * @param {ICCommunity_ClanAnnouncementInfo=} [properties] Properties to set
+         * @returns {CCommunity_ClanAnnouncementInfo} CCommunity_ClanAnnouncementInfo instance
+         */
+        CCommunity_ClanAnnouncementInfo.create = function create(properties) {
+            return new CCommunity_ClanAnnouncementInfo(properties);
+        };
+    
+        /**
+         * Encodes the specified CCommunity_ClanAnnouncementInfo message. Does not implicitly {@link CCommunity_ClanAnnouncementInfo.verify|verify} messages.
+         * @function encode
+         * @memberof CCommunity_ClanAnnouncementInfo
+         * @static
+         * @param {ICCommunity_ClanAnnouncementInfo} message CCommunity_ClanAnnouncementInfo message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        CCommunity_ClanAnnouncementInfo.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.gid != null && message.hasOwnProperty("gid"))
+                writer.uint32(/* id 1, wireType 0 =*/8).uint64(message.gid);
+            if (message.clanid != null && message.hasOwnProperty("clanid"))
+                writer.uint32(/* id 2, wireType 0 =*/16).uint64(message.clanid);
+            if (message.posterid != null && message.hasOwnProperty("posterid"))
+                writer.uint32(/* id 3, wireType 0 =*/24).uint64(message.posterid);
+            if (message.headline != null && message.hasOwnProperty("headline"))
+                writer.uint32(/* id 4, wireType 2 =*/34).string(message.headline);
+            if (message.posttime != null && message.hasOwnProperty("posttime"))
+                writer.uint32(/* id 5, wireType 0 =*/40).uint32(message.posttime);
+            if (message.updatetime != null && message.hasOwnProperty("updatetime"))
+                writer.uint32(/* id 6, wireType 0 =*/48).uint32(message.updatetime);
+            if (message.body != null && message.hasOwnProperty("body"))
+                writer.uint32(/* id 7, wireType 2 =*/58).string(message.body);
+            if (message.commentcount != null && message.hasOwnProperty("commentcount"))
+                writer.uint32(/* id 8, wireType 0 =*/64).int32(message.commentcount);
+            if (message.tags != null && message.tags.length)
+                for (var i = 0; i < message.tags.length; ++i)
+                    writer.uint32(/* id 9, wireType 2 =*/74).string(message.tags[i]);
+            if (message.language != null && message.hasOwnProperty("language"))
+                writer.uint32(/* id 10, wireType 0 =*/80).int32(message.language);
+            if (message.hidden != null && message.hasOwnProperty("hidden"))
+                writer.uint32(/* id 11, wireType 0 =*/88).bool(message.hidden);
+            if (message.forum_topic_id != null && message.hasOwnProperty("forum_topic_id"))
+                writer.uint32(/* id 12, wireType 1 =*/97).fixed64(message.forum_topic_id);
+            return writer;
+        };
+    
+        /**
+         * Encodes the specified CCommunity_ClanAnnouncementInfo message, length delimited. Does not implicitly {@link CCommunity_ClanAnnouncementInfo.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof CCommunity_ClanAnnouncementInfo
+         * @static
+         * @param {ICCommunity_ClanAnnouncementInfo} message CCommunity_ClanAnnouncementInfo message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        CCommunity_ClanAnnouncementInfo.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+    
+        /**
+         * Decodes a CCommunity_ClanAnnouncementInfo message from the specified reader or buffer.
+         * @function decode
+         * @memberof CCommunity_ClanAnnouncementInfo
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {CCommunity_ClanAnnouncementInfo} CCommunity_ClanAnnouncementInfo
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        CCommunity_ClanAnnouncementInfo.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.CCommunity_ClanAnnouncementInfo();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1:
+                    message.gid = reader.uint64();
+                    break;
+                case 2:
+                    message.clanid = reader.uint64();
+                    break;
+                case 3:
+                    message.posterid = reader.uint64();
+                    break;
+                case 4:
+                    message.headline = reader.string();
+                    break;
+                case 5:
+                    message.posttime = reader.uint32();
+                    break;
+                case 6:
+                    message.updatetime = reader.uint32();
+                    break;
+                case 7:
+                    message.body = reader.string();
+                    break;
+                case 8:
+                    message.commentcount = reader.int32();
+                    break;
+                case 9:
+                    if (!(message.tags && message.tags.length))
+                        message.tags = [];
+                    message.tags.push(reader.string());
+                    break;
+                case 10:
+                    message.language = reader.int32();
+                    break;
+                case 11:
+                    message.hidden = reader.bool();
+                    break;
+                case 12:
+                    message.forum_topic_id = reader.fixed64();
+                    break;
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+    
+        /**
+         * Decodes a CCommunity_ClanAnnouncementInfo message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof CCommunity_ClanAnnouncementInfo
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {CCommunity_ClanAnnouncementInfo} CCommunity_ClanAnnouncementInfo
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        CCommunity_ClanAnnouncementInfo.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+    
+        /**
+         * Verifies a CCommunity_ClanAnnouncementInfo message.
+         * @function verify
+         * @memberof CCommunity_ClanAnnouncementInfo
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        CCommunity_ClanAnnouncementInfo.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.gid != null && message.hasOwnProperty("gid"))
+                if (!$util.isInteger(message.gid) && !(message.gid && $util.isInteger(message.gid.low) && $util.isInteger(message.gid.high)))
+                    return "gid: integer|Long expected";
+            if (message.clanid != null && message.hasOwnProperty("clanid"))
+                if (!$util.isInteger(message.clanid) && !(message.clanid && $util.isInteger(message.clanid.low) && $util.isInteger(message.clanid.high)))
+                    return "clanid: integer|Long expected";
+            if (message.posterid != null && message.hasOwnProperty("posterid"))
+                if (!$util.isInteger(message.posterid) && !(message.posterid && $util.isInteger(message.posterid.low) && $util.isInteger(message.posterid.high)))
+                    return "posterid: integer|Long expected";
+            if (message.headline != null && message.hasOwnProperty("headline"))
+                if (!$util.isString(message.headline))
+                    return "headline: string expected";
+            if (message.posttime != null && message.hasOwnProperty("posttime"))
+                if (!$util.isInteger(message.posttime))
+                    return "posttime: integer expected";
+            if (message.updatetime != null && message.hasOwnProperty("updatetime"))
+                if (!$util.isInteger(message.updatetime))
+                    return "updatetime: integer expected";
+            if (message.body != null && message.hasOwnProperty("body"))
+                if (!$util.isString(message.body))
+                    return "body: string expected";
+            if (message.commentcount != null && message.hasOwnProperty("commentcount"))
+                if (!$util.isInteger(message.commentcount))
+                    return "commentcount: integer expected";
+            if (message.tags != null && message.hasOwnProperty("tags")) {
+                if (!Array.isArray(message.tags))
+                    return "tags: array expected";
+                for (var i = 0; i < message.tags.length; ++i)
+                    if (!$util.isString(message.tags[i]))
+                        return "tags: string[] expected";
+            }
+            if (message.language != null && message.hasOwnProperty("language"))
+                if (!$util.isInteger(message.language))
+                    return "language: integer expected";
+            if (message.hidden != null && message.hasOwnProperty("hidden"))
+                if (typeof message.hidden !== "boolean")
+                    return "hidden: boolean expected";
+            if (message.forum_topic_id != null && message.hasOwnProperty("forum_topic_id"))
+                if (!$util.isInteger(message.forum_topic_id) && !(message.forum_topic_id && $util.isInteger(message.forum_topic_id.low) && $util.isInteger(message.forum_topic_id.high)))
+                    return "forum_topic_id: integer|Long expected";
+            return null;
+        };
+    
+        /**
+         * Creates a CCommunity_ClanAnnouncementInfo message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof CCommunity_ClanAnnouncementInfo
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {CCommunity_ClanAnnouncementInfo} CCommunity_ClanAnnouncementInfo
+         */
+        CCommunity_ClanAnnouncementInfo.fromObject = function fromObject(object) {
+            if (object instanceof $root.CCommunity_ClanAnnouncementInfo)
+                return object;
+            var message = new $root.CCommunity_ClanAnnouncementInfo();
+            if (object.gid != null)
+                if ($util.Long)
+                    (message.gid = $util.Long.fromValue(object.gid)).unsigned = true;
+                else if (typeof object.gid === "string")
+                    message.gid = parseInt(object.gid, 10);
+                else if (typeof object.gid === "number")
+                    message.gid = object.gid;
+                else if (typeof object.gid === "object")
+                    message.gid = new $util.LongBits(object.gid.low >>> 0, object.gid.high >>> 0).toNumber(true);
+            if (object.clanid != null)
+                if ($util.Long)
+                    (message.clanid = $util.Long.fromValue(object.clanid)).unsigned = true;
+                else if (typeof object.clanid === "string")
+                    message.clanid = parseInt(object.clanid, 10);
+                else if (typeof object.clanid === "number")
+                    message.clanid = object.clanid;
+                else if (typeof object.clanid === "object")
+                    message.clanid = new $util.LongBits(object.clanid.low >>> 0, object.clanid.high >>> 0).toNumber(true);
+            if (object.posterid != null)
+                if ($util.Long)
+                    (message.posterid = $util.Long.fromValue(object.posterid)).unsigned = true;
+                else if (typeof object.posterid === "string")
+                    message.posterid = parseInt(object.posterid, 10);
+                else if (typeof object.posterid === "number")
+                    message.posterid = object.posterid;
+                else if (typeof object.posterid === "object")
+                    message.posterid = new $util.LongBits(object.posterid.low >>> 0, object.posterid.high >>> 0).toNumber(true);
+            if (object.headline != null)
+                message.headline = String(object.headline);
+            if (object.posttime != null)
+                message.posttime = object.posttime >>> 0;
+            if (object.updatetime != null)
+                message.updatetime = object.updatetime >>> 0;
+            if (object.body != null)
+                message.body = String(object.body);
+            if (object.commentcount != null)
+                message.commentcount = object.commentcount | 0;
+            if (object.tags) {
+                if (!Array.isArray(object.tags))
+                    throw TypeError(".CCommunity_ClanAnnouncementInfo.tags: array expected");
+                message.tags = [];
+                for (var i = 0; i < object.tags.length; ++i)
+                    message.tags[i] = String(object.tags[i]);
+            }
+            if (object.language != null)
+                message.language = object.language | 0;
+            if (object.hidden != null)
+                message.hidden = Boolean(object.hidden);
+            if (object.forum_topic_id != null)
+                if ($util.Long)
+                    (message.forum_topic_id = $util.Long.fromValue(object.forum_topic_id)).unsigned = false;
+                else if (typeof object.forum_topic_id === "string")
+                    message.forum_topic_id = parseInt(object.forum_topic_id, 10);
+                else if (typeof object.forum_topic_id === "number")
+                    message.forum_topic_id = object.forum_topic_id;
+                else if (typeof object.forum_topic_id === "object")
+                    message.forum_topic_id = new $util.LongBits(object.forum_topic_id.low >>> 0, object.forum_topic_id.high >>> 0).toNumber();
+            return message;
+        };
+    
+        /**
+         * Creates a plain object from a CCommunity_ClanAnnouncementInfo message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof CCommunity_ClanAnnouncementInfo
+         * @static
+         * @param {CCommunity_ClanAnnouncementInfo} message CCommunity_ClanAnnouncementInfo
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        CCommunity_ClanAnnouncementInfo.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.arrays || options.defaults)
+                object.tags = [];
+            if (options.defaults) {
+                if ($util.Long) {
+                    var long = new $util.Long(0, 0, true);
+                    object.gid = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                } else
+                    object.gid = options.longs === String ? "0" : 0;
+                if ($util.Long) {
+                    var long = new $util.Long(0, 0, true);
+                    object.clanid = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                } else
+                    object.clanid = options.longs === String ? "0" : 0;
+                if ($util.Long) {
+                    var long = new $util.Long(0, 0, true);
+                    object.posterid = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                } else
+                    object.posterid = options.longs === String ? "0" : 0;
+                object.headline = "";
+                object.posttime = 0;
+                object.updatetime = 0;
+                object.body = "";
+                object.commentcount = 0;
+                object.language = 0;
+                object.hidden = false;
+                if ($util.Long) {
+                    var long = new $util.Long(0, 0, false);
+                    object.forum_topic_id = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                } else
+                    object.forum_topic_id = options.longs === String ? "0" : 0;
+            }
+            if (message.gid != null && message.hasOwnProperty("gid"))
+                if (typeof message.gid === "number")
+                    object.gid = options.longs === String ? String(message.gid) : message.gid;
+                else
+                    object.gid = options.longs === String ? $util.Long.prototype.toString.call(message.gid) : options.longs === Number ? new $util.LongBits(message.gid.low >>> 0, message.gid.high >>> 0).toNumber(true) : message.gid;
+            if (message.clanid != null && message.hasOwnProperty("clanid"))
+                if (typeof message.clanid === "number")
+                    object.clanid = options.longs === String ? String(message.clanid) : message.clanid;
+                else
+                    object.clanid = options.longs === String ? $util.Long.prototype.toString.call(message.clanid) : options.longs === Number ? new $util.LongBits(message.clanid.low >>> 0, message.clanid.high >>> 0).toNumber(true) : message.clanid;
+            if (message.posterid != null && message.hasOwnProperty("posterid"))
+                if (typeof message.posterid === "number")
+                    object.posterid = options.longs === String ? String(message.posterid) : message.posterid;
+                else
+                    object.posterid = options.longs === String ? $util.Long.prototype.toString.call(message.posterid) : options.longs === Number ? new $util.LongBits(message.posterid.low >>> 0, message.posterid.high >>> 0).toNumber(true) : message.posterid;
+            if (message.headline != null && message.hasOwnProperty("headline"))
+                object.headline = message.headline;
+            if (message.posttime != null && message.hasOwnProperty("posttime"))
+                object.posttime = message.posttime;
+            if (message.updatetime != null && message.hasOwnProperty("updatetime"))
+                object.updatetime = message.updatetime;
+            if (message.body != null && message.hasOwnProperty("body"))
+                object.body = message.body;
+            if (message.commentcount != null && message.hasOwnProperty("commentcount"))
+                object.commentcount = message.commentcount;
+            if (message.tags && message.tags.length) {
+                object.tags = [];
+                for (var j = 0; j < message.tags.length; ++j)
+                    object.tags[j] = message.tags[j];
+            }
+            if (message.language != null && message.hasOwnProperty("language"))
+                object.language = message.language;
+            if (message.hidden != null && message.hasOwnProperty("hidden"))
+                object.hidden = message.hidden;
+            if (message.forum_topic_id != null && message.hasOwnProperty("forum_topic_id"))
+                if (typeof message.forum_topic_id === "number")
+                    object.forum_topic_id = options.longs === String ? String(message.forum_topic_id) : message.forum_topic_id;
+                else
+                    object.forum_topic_id = options.longs === String ? $util.Long.prototype.toString.call(message.forum_topic_id) : options.longs === Number ? new $util.LongBits(message.forum_topic_id.low >>> 0, message.forum_topic_id.high >>> 0).toNumber() : message.forum_topic_id;
+            return object;
+        };
+    
+        /**
+         * Converts this CCommunity_ClanAnnouncementInfo to JSON.
+         * @function toJSON
+         * @memberof CCommunity_ClanAnnouncementInfo
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        CCommunity_ClanAnnouncementInfo.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+    
+        return CCommunity_ClanAnnouncementInfo;
+    })();
+    
+    $root.CClanEventData = (function() {
+    
+        /**
+         * Properties of a CClanEventData.
+         * @exports ICClanEventData
+         * @interface ICClanEventData
+         * @property {number|Long|null} [gid] CClanEventData gid
+         * @property {number|Long|null} [clan_steamid] CClanEventData clan_steamid
+         * @property {string|null} [event_name] CClanEventData event_name
+         * @property {EProtoClanEventType|null} [event_type] CClanEventData event_type
+         * @property {number|null} [appid] CClanEventData appid
+         * @property {string|null} [server_address] CClanEventData server_address
+         * @property {string|null} [server_password] CClanEventData server_password
+         * @property {number|null} [rtime32_start_time] CClanEventData rtime32_start_time
+         * @property {number|null} [rtime32_end_time] CClanEventData rtime32_end_time
+         * @property {number|null} [comment_count] CClanEventData comment_count
+         * @property {number|Long|null} [creator_steamid] CClanEventData creator_steamid
+         * @property {number|Long|null} [last_update_steamid] CClanEventData last_update_steamid
+         * @property {string|null} [event_notes] CClanEventData event_notes
+         * @property {string|null} [jsondata] CClanEventData jsondata
+         * @property {ICCommunity_ClanAnnouncementInfo|null} [announcement_body] CClanEventData announcement_body
+         * @property {boolean|null} [published] CClanEventData published
+         * @property {boolean|null} [hidden] CClanEventData hidden
+         * @property {number|null} [rtime32_visibility_start] CClanEventData rtime32_visibility_start
+         * @property {number|null} [rtime32_visibility_end] CClanEventData rtime32_visibility_end
+         * @property {number|null} [broadcaster_accountid] CClanEventData broadcaster_accountid
+         * @property {number|null} [follower_count] CClanEventData follower_count
+         * @property {number|null} [ignore_count] CClanEventData ignore_count
+         * @property {number|Long|null} [forum_topic_id] CClanEventData forum_topic_id
+         * @property {number|null} [rtime32_last_modified] CClanEventData rtime32_last_modified
+         */
+    
+        /**
+         * Constructs a new CClanEventData.
+         * @exports CClanEventData
+         * @classdesc Represents a CClanEventData.
+         * @implements ICClanEventData
+         * @constructor
+         * @param {ICClanEventData=} [properties] Properties to set
+         */
+        function CClanEventData(properties) {
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+    
+        /**
+         * CClanEventData gid.
+         * @member {number|Long} gid
+         * @memberof CClanEventData
+         * @instance
+         */
+        CClanEventData.prototype.gid = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    
+        /**
+         * CClanEventData clan_steamid.
+         * @member {number|Long} clan_steamid
+         * @memberof CClanEventData
+         * @instance
+         */
+        CClanEventData.prototype.clan_steamid = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    
+        /**
+         * CClanEventData event_name.
+         * @member {string} event_name
+         * @memberof CClanEventData
+         * @instance
+         */
+        CClanEventData.prototype.event_name = "";
+    
+        /**
+         * CClanEventData event_type.
+         * @member {EProtoClanEventType} event_type
+         * @memberof CClanEventData
+         * @instance
+         */
+        CClanEventData.prototype.event_type = 1;
+    
+        /**
+         * CClanEventData appid.
+         * @member {number} appid
+         * @memberof CClanEventData
+         * @instance
+         */
+        CClanEventData.prototype.appid = 0;
+    
+        /**
+         * CClanEventData server_address.
+         * @member {string} server_address
+         * @memberof CClanEventData
+         * @instance
+         */
+        CClanEventData.prototype.server_address = "";
+    
+        /**
+         * CClanEventData server_password.
+         * @member {string} server_password
+         * @memberof CClanEventData
+         * @instance
+         */
+        CClanEventData.prototype.server_password = "";
+    
+        /**
+         * CClanEventData rtime32_start_time.
+         * @member {number} rtime32_start_time
+         * @memberof CClanEventData
+         * @instance
+         */
+        CClanEventData.prototype.rtime32_start_time = 0;
+    
+        /**
+         * CClanEventData rtime32_end_time.
+         * @member {number} rtime32_end_time
+         * @memberof CClanEventData
+         * @instance
+         */
+        CClanEventData.prototype.rtime32_end_time = 0;
+    
+        /**
+         * CClanEventData comment_count.
+         * @member {number} comment_count
+         * @memberof CClanEventData
+         * @instance
+         */
+        CClanEventData.prototype.comment_count = 0;
+    
+        /**
+         * CClanEventData creator_steamid.
+         * @member {number|Long} creator_steamid
+         * @memberof CClanEventData
+         * @instance
+         */
+        CClanEventData.prototype.creator_steamid = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    
+        /**
+         * CClanEventData last_update_steamid.
+         * @member {number|Long} last_update_steamid
+         * @memberof CClanEventData
+         * @instance
+         */
+        CClanEventData.prototype.last_update_steamid = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    
+        /**
+         * CClanEventData event_notes.
+         * @member {string} event_notes
+         * @memberof CClanEventData
+         * @instance
+         */
+        CClanEventData.prototype.event_notes = "";
+    
+        /**
+         * CClanEventData jsondata.
+         * @member {string} jsondata
+         * @memberof CClanEventData
+         * @instance
+         */
+        CClanEventData.prototype.jsondata = "";
+    
+        /**
+         * CClanEventData announcement_body.
+         * @member {ICCommunity_ClanAnnouncementInfo|null|undefined} announcement_body
+         * @memberof CClanEventData
+         * @instance
+         */
+        CClanEventData.prototype.announcement_body = null;
+    
+        /**
+         * CClanEventData published.
+         * @member {boolean} published
+         * @memberof CClanEventData
+         * @instance
+         */
+        CClanEventData.prototype.published = false;
+    
+        /**
+         * CClanEventData hidden.
+         * @member {boolean} hidden
+         * @memberof CClanEventData
+         * @instance
+         */
+        CClanEventData.prototype.hidden = false;
+    
+        /**
+         * CClanEventData rtime32_visibility_start.
+         * @member {number} rtime32_visibility_start
+         * @memberof CClanEventData
+         * @instance
+         */
+        CClanEventData.prototype.rtime32_visibility_start = 0;
+    
+        /**
+         * CClanEventData rtime32_visibility_end.
+         * @member {number} rtime32_visibility_end
+         * @memberof CClanEventData
+         * @instance
+         */
+        CClanEventData.prototype.rtime32_visibility_end = 0;
+    
+        /**
+         * CClanEventData broadcaster_accountid.
+         * @member {number} broadcaster_accountid
+         * @memberof CClanEventData
+         * @instance
+         */
+        CClanEventData.prototype.broadcaster_accountid = 0;
+    
+        /**
+         * CClanEventData follower_count.
+         * @member {number} follower_count
+         * @memberof CClanEventData
+         * @instance
+         */
+        CClanEventData.prototype.follower_count = 0;
+    
+        /**
+         * CClanEventData ignore_count.
+         * @member {number} ignore_count
+         * @memberof CClanEventData
+         * @instance
+         */
+        CClanEventData.prototype.ignore_count = 0;
+    
+        /**
+         * CClanEventData forum_topic_id.
+         * @member {number|Long} forum_topic_id
+         * @memberof CClanEventData
+         * @instance
+         */
+        CClanEventData.prototype.forum_topic_id = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    
+        /**
+         * CClanEventData rtime32_last_modified.
+         * @member {number} rtime32_last_modified
+         * @memberof CClanEventData
+         * @instance
+         */
+        CClanEventData.prototype.rtime32_last_modified = 0;
+    
+        /**
+         * Creates a new CClanEventData instance using the specified properties.
+         * @function create
+         * @memberof CClanEventData
+         * @static
+         * @param {ICClanEventData=} [properties] Properties to set
+         * @returns {CClanEventData} CClanEventData instance
+         */
+        CClanEventData.create = function create(properties) {
+            return new CClanEventData(properties);
+        };
+    
+        /**
+         * Encodes the specified CClanEventData message. Does not implicitly {@link CClanEventData.verify|verify} messages.
+         * @function encode
+         * @memberof CClanEventData
+         * @static
+         * @param {ICClanEventData} message CClanEventData message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        CClanEventData.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.gid != null && message.hasOwnProperty("gid"))
+                writer.uint32(/* id 1, wireType 1 =*/9).fixed64(message.gid);
+            if (message.clan_steamid != null && message.hasOwnProperty("clan_steamid"))
+                writer.uint32(/* id 2, wireType 1 =*/17).fixed64(message.clan_steamid);
+            if (message.event_name != null && message.hasOwnProperty("event_name"))
+                writer.uint32(/* id 3, wireType 2 =*/26).string(message.event_name);
+            if (message.event_type != null && message.hasOwnProperty("event_type"))
+                writer.uint32(/* id 4, wireType 0 =*/32).int32(message.event_type);
+            if (message.appid != null && message.hasOwnProperty("appid"))
+                writer.uint32(/* id 5, wireType 0 =*/40).uint32(message.appid);
+            if (message.server_address != null && message.hasOwnProperty("server_address"))
+                writer.uint32(/* id 6, wireType 2 =*/50).string(message.server_address);
+            if (message.server_password != null && message.hasOwnProperty("server_password"))
+                writer.uint32(/* id 7, wireType 2 =*/58).string(message.server_password);
+            if (message.rtime32_start_time != null && message.hasOwnProperty("rtime32_start_time"))
+                writer.uint32(/* id 8, wireType 0 =*/64).uint32(message.rtime32_start_time);
+            if (message.rtime32_end_time != null && message.hasOwnProperty("rtime32_end_time"))
+                writer.uint32(/* id 9, wireType 0 =*/72).uint32(message.rtime32_end_time);
+            if (message.comment_count != null && message.hasOwnProperty("comment_count"))
+                writer.uint32(/* id 10, wireType 0 =*/80).int32(message.comment_count);
+            if (message.creator_steamid != null && message.hasOwnProperty("creator_steamid"))
+                writer.uint32(/* id 11, wireType 1 =*/89).fixed64(message.creator_steamid);
+            if (message.last_update_steamid != null && message.hasOwnProperty("last_update_steamid"))
+                writer.uint32(/* id 12, wireType 1 =*/97).fixed64(message.last_update_steamid);
+            if (message.event_notes != null && message.hasOwnProperty("event_notes"))
+                writer.uint32(/* id 13, wireType 2 =*/106).string(message.event_notes);
+            if (message.jsondata != null && message.hasOwnProperty("jsondata"))
+                writer.uint32(/* id 14, wireType 2 =*/114).string(message.jsondata);
+            if (message.announcement_body != null && message.hasOwnProperty("announcement_body"))
+                $root.CCommunity_ClanAnnouncementInfo.encode(message.announcement_body, writer.uint32(/* id 15, wireType 2 =*/122).fork()).ldelim();
+            if (message.published != null && message.hasOwnProperty("published"))
+                writer.uint32(/* id 16, wireType 0 =*/128).bool(message.published);
+            if (message.hidden != null && message.hasOwnProperty("hidden"))
+                writer.uint32(/* id 17, wireType 0 =*/136).bool(message.hidden);
+            if (message.rtime32_visibility_start != null && message.hasOwnProperty("rtime32_visibility_start"))
+                writer.uint32(/* id 18, wireType 0 =*/144).uint32(message.rtime32_visibility_start);
+            if (message.rtime32_visibility_end != null && message.hasOwnProperty("rtime32_visibility_end"))
+                writer.uint32(/* id 19, wireType 0 =*/152).uint32(message.rtime32_visibility_end);
+            if (message.broadcaster_accountid != null && message.hasOwnProperty("broadcaster_accountid"))
+                writer.uint32(/* id 20, wireType 0 =*/160).uint32(message.broadcaster_accountid);
+            if (message.follower_count != null && message.hasOwnProperty("follower_count"))
+                writer.uint32(/* id 21, wireType 0 =*/168).uint32(message.follower_count);
+            if (message.ignore_count != null && message.hasOwnProperty("ignore_count"))
+                writer.uint32(/* id 22, wireType 0 =*/176).uint32(message.ignore_count);
+            if (message.forum_topic_id != null && message.hasOwnProperty("forum_topic_id"))
+                writer.uint32(/* id 23, wireType 1 =*/185).fixed64(message.forum_topic_id);
+            if (message.rtime32_last_modified != null && message.hasOwnProperty("rtime32_last_modified"))
+                writer.uint32(/* id 24, wireType 0 =*/192).uint32(message.rtime32_last_modified);
+            return writer;
+        };
+    
+        /**
+         * Encodes the specified CClanEventData message, length delimited. Does not implicitly {@link CClanEventData.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof CClanEventData
+         * @static
+         * @param {ICClanEventData} message CClanEventData message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        CClanEventData.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+    
+        /**
+         * Decodes a CClanEventData message from the specified reader or buffer.
+         * @function decode
+         * @memberof CClanEventData
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {CClanEventData} CClanEventData
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        CClanEventData.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.CClanEventData();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1:
+                    message.gid = reader.fixed64();
+                    break;
+                case 2:
+                    message.clan_steamid = reader.fixed64();
+                    break;
+                case 3:
+                    message.event_name = reader.string();
+                    break;
+                case 4:
+                    message.event_type = reader.int32();
+                    break;
+                case 5:
+                    message.appid = reader.uint32();
+                    break;
+                case 6:
+                    message.server_address = reader.string();
+                    break;
+                case 7:
+                    message.server_password = reader.string();
+                    break;
+                case 8:
+                    message.rtime32_start_time = reader.uint32();
+                    break;
+                case 9:
+                    message.rtime32_end_time = reader.uint32();
+                    break;
+                case 10:
+                    message.comment_count = reader.int32();
+                    break;
+                case 11:
+                    message.creator_steamid = reader.fixed64();
+                    break;
+                case 12:
+                    message.last_update_steamid = reader.fixed64();
+                    break;
+                case 13:
+                    message.event_notes = reader.string();
+                    break;
+                case 14:
+                    message.jsondata = reader.string();
+                    break;
+                case 15:
+                    message.announcement_body = $root.CCommunity_ClanAnnouncementInfo.decode(reader, reader.uint32());
+                    break;
+                case 16:
+                    message.published = reader.bool();
+                    break;
+                case 17:
+                    message.hidden = reader.bool();
+                    break;
+                case 18:
+                    message.rtime32_visibility_start = reader.uint32();
+                    break;
+                case 19:
+                    message.rtime32_visibility_end = reader.uint32();
+                    break;
+                case 20:
+                    message.broadcaster_accountid = reader.uint32();
+                    break;
+                case 21:
+                    message.follower_count = reader.uint32();
+                    break;
+                case 22:
+                    message.ignore_count = reader.uint32();
+                    break;
+                case 23:
+                    message.forum_topic_id = reader.fixed64();
+                    break;
+                case 24:
+                    message.rtime32_last_modified = reader.uint32();
+                    break;
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+    
+        /**
+         * Decodes a CClanEventData message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof CClanEventData
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {CClanEventData} CClanEventData
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        CClanEventData.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+    
+        /**
+         * Verifies a CClanEventData message.
+         * @function verify
+         * @memberof CClanEventData
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        CClanEventData.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.gid != null && message.hasOwnProperty("gid"))
+                if (!$util.isInteger(message.gid) && !(message.gid && $util.isInteger(message.gid.low) && $util.isInteger(message.gid.high)))
+                    return "gid: integer|Long expected";
+            if (message.clan_steamid != null && message.hasOwnProperty("clan_steamid"))
+                if (!$util.isInteger(message.clan_steamid) && !(message.clan_steamid && $util.isInteger(message.clan_steamid.low) && $util.isInteger(message.clan_steamid.high)))
+                    return "clan_steamid: integer|Long expected";
+            if (message.event_name != null && message.hasOwnProperty("event_name"))
+                if (!$util.isString(message.event_name))
+                    return "event_name: string expected";
+            if (message.event_type != null && message.hasOwnProperty("event_type"))
+                switch (message.event_type) {
+                default:
+                    return "event_type: enum value expected";
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                case 9:
+                case 10:
+                case 11:
+                case 12:
+                case 13:
+                case 14:
+                case 15:
+                case 16:
+                case 17:
+                case 18:
+                case 19:
+                case 20:
+                case 21:
+                case 22:
+                case 23:
+                case 24:
+                case 25:
+                case 26:
+                case 27:
+                case 28:
+                case 29:
+                case 30:
+                case 31:
+                case 32:
+                case 33:
+                    break;
+                }
+            if (message.appid != null && message.hasOwnProperty("appid"))
+                if (!$util.isInteger(message.appid))
+                    return "appid: integer expected";
+            if (message.server_address != null && message.hasOwnProperty("server_address"))
+                if (!$util.isString(message.server_address))
+                    return "server_address: string expected";
+            if (message.server_password != null && message.hasOwnProperty("server_password"))
+                if (!$util.isString(message.server_password))
+                    return "server_password: string expected";
+            if (message.rtime32_start_time != null && message.hasOwnProperty("rtime32_start_time"))
+                if (!$util.isInteger(message.rtime32_start_time))
+                    return "rtime32_start_time: integer expected";
+            if (message.rtime32_end_time != null && message.hasOwnProperty("rtime32_end_time"))
+                if (!$util.isInteger(message.rtime32_end_time))
+                    return "rtime32_end_time: integer expected";
+            if (message.comment_count != null && message.hasOwnProperty("comment_count"))
+                if (!$util.isInteger(message.comment_count))
+                    return "comment_count: integer expected";
+            if (message.creator_steamid != null && message.hasOwnProperty("creator_steamid"))
+                if (!$util.isInteger(message.creator_steamid) && !(message.creator_steamid && $util.isInteger(message.creator_steamid.low) && $util.isInteger(message.creator_steamid.high)))
+                    return "creator_steamid: integer|Long expected";
+            if (message.last_update_steamid != null && message.hasOwnProperty("last_update_steamid"))
+                if (!$util.isInteger(message.last_update_steamid) && !(message.last_update_steamid && $util.isInteger(message.last_update_steamid.low) && $util.isInteger(message.last_update_steamid.high)))
+                    return "last_update_steamid: integer|Long expected";
+            if (message.event_notes != null && message.hasOwnProperty("event_notes"))
+                if (!$util.isString(message.event_notes))
+                    return "event_notes: string expected";
+            if (message.jsondata != null && message.hasOwnProperty("jsondata"))
+                if (!$util.isString(message.jsondata))
+                    return "jsondata: string expected";
+            if (message.announcement_body != null && message.hasOwnProperty("announcement_body")) {
+                var error = $root.CCommunity_ClanAnnouncementInfo.verify(message.announcement_body);
+                if (error)
+                    return "announcement_body." + error;
+            }
+            if (message.published != null && message.hasOwnProperty("published"))
+                if (typeof message.published !== "boolean")
+                    return "published: boolean expected";
+            if (message.hidden != null && message.hasOwnProperty("hidden"))
+                if (typeof message.hidden !== "boolean")
+                    return "hidden: boolean expected";
+            if (message.rtime32_visibility_start != null && message.hasOwnProperty("rtime32_visibility_start"))
+                if (!$util.isInteger(message.rtime32_visibility_start))
+                    return "rtime32_visibility_start: integer expected";
+            if (message.rtime32_visibility_end != null && message.hasOwnProperty("rtime32_visibility_end"))
+                if (!$util.isInteger(message.rtime32_visibility_end))
+                    return "rtime32_visibility_end: integer expected";
+            if (message.broadcaster_accountid != null && message.hasOwnProperty("broadcaster_accountid"))
+                if (!$util.isInteger(message.broadcaster_accountid))
+                    return "broadcaster_accountid: integer expected";
+            if (message.follower_count != null && message.hasOwnProperty("follower_count"))
+                if (!$util.isInteger(message.follower_count))
+                    return "follower_count: integer expected";
+            if (message.ignore_count != null && message.hasOwnProperty("ignore_count"))
+                if (!$util.isInteger(message.ignore_count))
+                    return "ignore_count: integer expected";
+            if (message.forum_topic_id != null && message.hasOwnProperty("forum_topic_id"))
+                if (!$util.isInteger(message.forum_topic_id) && !(message.forum_topic_id && $util.isInteger(message.forum_topic_id.low) && $util.isInteger(message.forum_topic_id.high)))
+                    return "forum_topic_id: integer|Long expected";
+            if (message.rtime32_last_modified != null && message.hasOwnProperty("rtime32_last_modified"))
+                if (!$util.isInteger(message.rtime32_last_modified))
+                    return "rtime32_last_modified: integer expected";
+            return null;
+        };
+    
+        /**
+         * Creates a CClanEventData message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof CClanEventData
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {CClanEventData} CClanEventData
+         */
+        CClanEventData.fromObject = function fromObject(object) {
+            if (object instanceof $root.CClanEventData)
+                return object;
+            var message = new $root.CClanEventData();
+            if (object.gid != null)
+                if ($util.Long)
+                    (message.gid = $util.Long.fromValue(object.gid)).unsigned = false;
+                else if (typeof object.gid === "string")
+                    message.gid = parseInt(object.gid, 10);
+                else if (typeof object.gid === "number")
+                    message.gid = object.gid;
+                else if (typeof object.gid === "object")
+                    message.gid = new $util.LongBits(object.gid.low >>> 0, object.gid.high >>> 0).toNumber();
+            if (object.clan_steamid != null)
+                if ($util.Long)
+                    (message.clan_steamid = $util.Long.fromValue(object.clan_steamid)).unsigned = false;
+                else if (typeof object.clan_steamid === "string")
+                    message.clan_steamid = parseInt(object.clan_steamid, 10);
+                else if (typeof object.clan_steamid === "number")
+                    message.clan_steamid = object.clan_steamid;
+                else if (typeof object.clan_steamid === "object")
+                    message.clan_steamid = new $util.LongBits(object.clan_steamid.low >>> 0, object.clan_steamid.high >>> 0).toNumber();
+            if (object.event_name != null)
+                message.event_name = String(object.event_name);
+            switch (object.event_type) {
+            case "k_EClanOtherEvent":
+            case 1:
+                message.event_type = 1;
+                break;
+            case "k_EClanGameEvent":
+            case 2:
+                message.event_type = 2;
+                break;
+            case "k_EClanPartyEvent":
+            case 3:
+                message.event_type = 3;
+                break;
+            case "k_EClanMeetingEvent":
+            case 4:
+                message.event_type = 4;
+                break;
+            case "k_EClanSpecialCauseEvent":
+            case 5:
+                message.event_type = 5;
+                break;
+            case "k_EClanMusicAndArtsEvent":
+            case 6:
+                message.event_type = 6;
+                break;
+            case "k_EClanSportsEvent":
+            case 7:
+                message.event_type = 7;
+                break;
+            case "k_EClanTripEvent":
+            case 8:
+                message.event_type = 8;
+                break;
+            case "k_EClanChatEvent":
+            case 9:
+                message.event_type = 9;
+                break;
+            case "k_EClanGameReleaseEvent":
+            case 10:
+                message.event_type = 10;
+                break;
+            case "k_EClanBroadcastEvent":
+            case 11:
+                message.event_type = 11;
+                break;
+            case "k_EClanSmallUpdateEvent":
+            case 12:
+                message.event_type = 12;
+                break;
+            case "k_EClanPreAnnounceMajorUpdateEvent":
+            case 13:
+                message.event_type = 13;
+                break;
+            case "k_EClanMajorUpdateEvent":
+            case 14:
+                message.event_type = 14;
+                break;
+            case "k_EClanDLCReleaseEvent":
+            case 15:
+                message.event_type = 15;
+                break;
+            case "k_EClanFutureReleaseEvent":
+            case 16:
+                message.event_type = 16;
+                break;
+            case "k_EClanESportTournamentStreamEvent":
+            case 17:
+                message.event_type = 17;
+                break;
+            case "k_EClanDevStreamEvent":
+            case 18:
+                message.event_type = 18;
+                break;
+            case "k_EClanFamousStreamEvent":
+            case 19:
+                message.event_type = 19;
+                break;
+            case "k_EClanGameSalesEvent":
+            case 20:
+                message.event_type = 20;
+                break;
+            case "k_EClanGameItemSalesEvent":
+            case 21:
+                message.event_type = 21;
+                break;
+            case "k_EClanInGameBonusXPEvent":
+            case 22:
+                message.event_type = 22;
+                break;
+            case "k_EClanInGameLootEvent":
+            case 23:
+                message.event_type = 23;
+                break;
+            case "k_EClanInGamePerksEvent":
+            case 24:
+                message.event_type = 24;
+                break;
+            case "k_EClanInGameChallengeEvent":
+            case 25:
+                message.event_type = 25;
+                break;
+            case "k_EClanInGameContestEvent":
+            case 26:
+                message.event_type = 26;
+                break;
+            case "k_EClanIRLEvent":
+            case 27:
+                message.event_type = 27;
+                break;
+            case "k_EClanNewsEvent":
+            case 28:
+                message.event_type = 28;
+                break;
+            case "k_EClanBetaReleaseEvent":
+            case 29:
+                message.event_type = 29;
+                break;
+            case "k_EClanInGameContentReleaseEvent":
+            case 30:
+                message.event_type = 30;
+                break;
+            case "k_EClanFreeTrial":
+            case 31:
+                message.event_type = 31;
+                break;
+            case "k_EClanSeasonRelease":
+            case 32:
+                message.event_type = 32;
+                break;
+            case "k_EClanSeasonUpdate":
+            case 33:
+                message.event_type = 33;
+                break;
+            }
+            if (object.appid != null)
+                message.appid = object.appid >>> 0;
+            if (object.server_address != null)
+                message.server_address = String(object.server_address);
+            if (object.server_password != null)
+                message.server_password = String(object.server_password);
+            if (object.rtime32_start_time != null)
+                message.rtime32_start_time = object.rtime32_start_time >>> 0;
+            if (object.rtime32_end_time != null)
+                message.rtime32_end_time = object.rtime32_end_time >>> 0;
+            if (object.comment_count != null)
+                message.comment_count = object.comment_count | 0;
+            if (object.creator_steamid != null)
+                if ($util.Long)
+                    (message.creator_steamid = $util.Long.fromValue(object.creator_steamid)).unsigned = false;
+                else if (typeof object.creator_steamid === "string")
+                    message.creator_steamid = parseInt(object.creator_steamid, 10);
+                else if (typeof object.creator_steamid === "number")
+                    message.creator_steamid = object.creator_steamid;
+                else if (typeof object.creator_steamid === "object")
+                    message.creator_steamid = new $util.LongBits(object.creator_steamid.low >>> 0, object.creator_steamid.high >>> 0).toNumber();
+            if (object.last_update_steamid != null)
+                if ($util.Long)
+                    (message.last_update_steamid = $util.Long.fromValue(object.last_update_steamid)).unsigned = false;
+                else if (typeof object.last_update_steamid === "string")
+                    message.last_update_steamid = parseInt(object.last_update_steamid, 10);
+                else if (typeof object.last_update_steamid === "number")
+                    message.last_update_steamid = object.last_update_steamid;
+                else if (typeof object.last_update_steamid === "object")
+                    message.last_update_steamid = new $util.LongBits(object.last_update_steamid.low >>> 0, object.last_update_steamid.high >>> 0).toNumber();
+            if (object.event_notes != null)
+                message.event_notes = String(object.event_notes);
+            if (object.jsondata != null)
+                message.jsondata = String(object.jsondata);
+            if (object.announcement_body != null) {
+                if (typeof object.announcement_body !== "object")
+                    throw TypeError(".CClanEventData.announcement_body: object expected");
+                message.announcement_body = $root.CCommunity_ClanAnnouncementInfo.fromObject(object.announcement_body);
+            }
+            if (object.published != null)
+                message.published = Boolean(object.published);
+            if (object.hidden != null)
+                message.hidden = Boolean(object.hidden);
+            if (object.rtime32_visibility_start != null)
+                message.rtime32_visibility_start = object.rtime32_visibility_start >>> 0;
+            if (object.rtime32_visibility_end != null)
+                message.rtime32_visibility_end = object.rtime32_visibility_end >>> 0;
+            if (object.broadcaster_accountid != null)
+                message.broadcaster_accountid = object.broadcaster_accountid >>> 0;
+            if (object.follower_count != null)
+                message.follower_count = object.follower_count >>> 0;
+            if (object.ignore_count != null)
+                message.ignore_count = object.ignore_count >>> 0;
+            if (object.forum_topic_id != null)
+                if ($util.Long)
+                    (message.forum_topic_id = $util.Long.fromValue(object.forum_topic_id)).unsigned = false;
+                else if (typeof object.forum_topic_id === "string")
+                    message.forum_topic_id = parseInt(object.forum_topic_id, 10);
+                else if (typeof object.forum_topic_id === "number")
+                    message.forum_topic_id = object.forum_topic_id;
+                else if (typeof object.forum_topic_id === "object")
+                    message.forum_topic_id = new $util.LongBits(object.forum_topic_id.low >>> 0, object.forum_topic_id.high >>> 0).toNumber();
+            if (object.rtime32_last_modified != null)
+                message.rtime32_last_modified = object.rtime32_last_modified >>> 0;
+            return message;
+        };
+    
+        /**
+         * Creates a plain object from a CClanEventData message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof CClanEventData
+         * @static
+         * @param {CClanEventData} message CClanEventData
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        CClanEventData.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.defaults) {
+                if ($util.Long) {
+                    var long = new $util.Long(0, 0, false);
+                    object.gid = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                } else
+                    object.gid = options.longs === String ? "0" : 0;
+                if ($util.Long) {
+                    var long = new $util.Long(0, 0, false);
+                    object.clan_steamid = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                } else
+                    object.clan_steamid = options.longs === String ? "0" : 0;
+                object.event_name = "";
+                object.event_type = options.enums === String ? "k_EClanOtherEvent" : 1;
+                object.appid = 0;
+                object.server_address = "";
+                object.server_password = "";
+                object.rtime32_start_time = 0;
+                object.rtime32_end_time = 0;
+                object.comment_count = 0;
+                if ($util.Long) {
+                    var long = new $util.Long(0, 0, false);
+                    object.creator_steamid = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                } else
+                    object.creator_steamid = options.longs === String ? "0" : 0;
+                if ($util.Long) {
+                    var long = new $util.Long(0, 0, false);
+                    object.last_update_steamid = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                } else
+                    object.last_update_steamid = options.longs === String ? "0" : 0;
+                object.event_notes = "";
+                object.jsondata = "";
+                object.announcement_body = null;
+                object.published = false;
+                object.hidden = false;
+                object.rtime32_visibility_start = 0;
+                object.rtime32_visibility_end = 0;
+                object.broadcaster_accountid = 0;
+                object.follower_count = 0;
+                object.ignore_count = 0;
+                if ($util.Long) {
+                    var long = new $util.Long(0, 0, false);
+                    object.forum_topic_id = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                } else
+                    object.forum_topic_id = options.longs === String ? "0" : 0;
+                object.rtime32_last_modified = 0;
+            }
+            if (message.gid != null && message.hasOwnProperty("gid"))
+                if (typeof message.gid === "number")
+                    object.gid = options.longs === String ? String(message.gid) : message.gid;
+                else
+                    object.gid = options.longs === String ? $util.Long.prototype.toString.call(message.gid) : options.longs === Number ? new $util.LongBits(message.gid.low >>> 0, message.gid.high >>> 0).toNumber() : message.gid;
+            if (message.clan_steamid != null && message.hasOwnProperty("clan_steamid"))
+                if (typeof message.clan_steamid === "number")
+                    object.clan_steamid = options.longs === String ? String(message.clan_steamid) : message.clan_steamid;
+                else
+                    object.clan_steamid = options.longs === String ? $util.Long.prototype.toString.call(message.clan_steamid) : options.longs === Number ? new $util.LongBits(message.clan_steamid.low >>> 0, message.clan_steamid.high >>> 0).toNumber() : message.clan_steamid;
+            if (message.event_name != null && message.hasOwnProperty("event_name"))
+                object.event_name = message.event_name;
+            if (message.event_type != null && message.hasOwnProperty("event_type"))
+                object.event_type = options.enums === String ? $root.EProtoClanEventType[message.event_type] : message.event_type;
+            if (message.appid != null && message.hasOwnProperty("appid"))
+                object.appid = message.appid;
+            if (message.server_address != null && message.hasOwnProperty("server_address"))
+                object.server_address = message.server_address;
+            if (message.server_password != null && message.hasOwnProperty("server_password"))
+                object.server_password = message.server_password;
+            if (message.rtime32_start_time != null && message.hasOwnProperty("rtime32_start_time"))
+                object.rtime32_start_time = message.rtime32_start_time;
+            if (message.rtime32_end_time != null && message.hasOwnProperty("rtime32_end_time"))
+                object.rtime32_end_time = message.rtime32_end_time;
+            if (message.comment_count != null && message.hasOwnProperty("comment_count"))
+                object.comment_count = message.comment_count;
+            if (message.creator_steamid != null && message.hasOwnProperty("creator_steamid"))
+                if (typeof message.creator_steamid === "number")
+                    object.creator_steamid = options.longs === String ? String(message.creator_steamid) : message.creator_steamid;
+                else
+                    object.creator_steamid = options.longs === String ? $util.Long.prototype.toString.call(message.creator_steamid) : options.longs === Number ? new $util.LongBits(message.creator_steamid.low >>> 0, message.creator_steamid.high >>> 0).toNumber() : message.creator_steamid;
+            if (message.last_update_steamid != null && message.hasOwnProperty("last_update_steamid"))
+                if (typeof message.last_update_steamid === "number")
+                    object.last_update_steamid = options.longs === String ? String(message.last_update_steamid) : message.last_update_steamid;
+                else
+                    object.last_update_steamid = options.longs === String ? $util.Long.prototype.toString.call(message.last_update_steamid) : options.longs === Number ? new $util.LongBits(message.last_update_steamid.low >>> 0, message.last_update_steamid.high >>> 0).toNumber() : message.last_update_steamid;
+            if (message.event_notes != null && message.hasOwnProperty("event_notes"))
+                object.event_notes = message.event_notes;
+            if (message.jsondata != null && message.hasOwnProperty("jsondata"))
+                object.jsondata = message.jsondata;
+            if (message.announcement_body != null && message.hasOwnProperty("announcement_body"))
+                object.announcement_body = $root.CCommunity_ClanAnnouncementInfo.toObject(message.announcement_body, options);
+            if (message.published != null && message.hasOwnProperty("published"))
+                object.published = message.published;
+            if (message.hidden != null && message.hasOwnProperty("hidden"))
+                object.hidden = message.hidden;
+            if (message.rtime32_visibility_start != null && message.hasOwnProperty("rtime32_visibility_start"))
+                object.rtime32_visibility_start = message.rtime32_visibility_start;
+            if (message.rtime32_visibility_end != null && message.hasOwnProperty("rtime32_visibility_end"))
+                object.rtime32_visibility_end = message.rtime32_visibility_end;
+            if (message.broadcaster_accountid != null && message.hasOwnProperty("broadcaster_accountid"))
+                object.broadcaster_accountid = message.broadcaster_accountid;
+            if (message.follower_count != null && message.hasOwnProperty("follower_count"))
+                object.follower_count = message.follower_count;
+            if (message.ignore_count != null && message.hasOwnProperty("ignore_count"))
+                object.ignore_count = message.ignore_count;
+            if (message.forum_topic_id != null && message.hasOwnProperty("forum_topic_id"))
+                if (typeof message.forum_topic_id === "number")
+                    object.forum_topic_id = options.longs === String ? String(message.forum_topic_id) : message.forum_topic_id;
+                else
+                    object.forum_topic_id = options.longs === String ? $util.Long.prototype.toString.call(message.forum_topic_id) : options.longs === Number ? new $util.LongBits(message.forum_topic_id.low >>> 0, message.forum_topic_id.high >>> 0).toNumber() : message.forum_topic_id;
+            if (message.rtime32_last_modified != null && message.hasOwnProperty("rtime32_last_modified"))
+                object.rtime32_last_modified = message.rtime32_last_modified;
+            return object;
+        };
+    
+        /**
+         * Converts this CClanEventData to JSON.
+         * @function toJSON
+         * @memberof CClanEventData
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        CClanEventData.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+    
+        return CClanEventData;
     })();
     
     $root.google = (function() {

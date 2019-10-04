@@ -19,48 +19,53 @@ const VZIP_FOOTER = 0x767A;
  * @return Promise
  */
 SteamUser.prototype.getContentServers = function(callback) {
-	return StdLib.Promises.callbackPromise(['servers'], callback, (accept, reject) => {
-		if (this._contentServers.length > 0 && Date.now() - this._contentServers.timestamp < (1000 * 60 * 60)) {
-			return accept({"servers": JSON.parse(JSON.stringify(this._contentServers))});
+	return StdLib.Promises.callbackPromise(['servers'], callback, (resolve, reject) => {
+		if (this._contentServers.length > 0 && Date.now() - this._contentServersTimestamp < (1000 * 60 * 60)) {
+			return resolve({"servers": JSON.parse(JSON.stringify(this._contentServers))});
 		}
 
-		let list = this.steamServers[SteamUser.EServerType.CS];
-
-		if (!list || list.length == 0) {
-			return reject(new Error("Server list not yet available"));
-		}
-
-		// pick a random one
-		let server = list[Math.floor(Math.random() * list.length)];
-		download("http://" + StdLib.IPv4.intToString(server.server_ip) + ":" + server.server_port + "/serverlist/" + this.cellID + "/20/", "cs.steamcontent.com", (err, res) => {
+		this._apiRequest("GET", "IContentServerDirectoryService", "GetServersForSteamPipe", 1, {"cell_id": this.cellID || 0}, (err, res) => {
 			if (err) {
 				return reject(err);
 			}
 
-			if (res.type != 'complete') {
-				return;
-			}
-
-			let parsed;
-			try {
-				parsed = VDF.parse(res.data.toString('utf8'));
-			} catch (ex) {
+			if (!res || !res.response || !res.response.servers) {
 				return reject(new Error("Malformed response"));
 			}
 
-			if (!parsed || !parsed.serverlist || !parsed.serverlist[0]) {
-				return reject(new Error("Malformed response"));
-			}
+			let servers = [];
 
-			parsed.serverlist.length = 0;
-			for (let i in parsed.serverlist) {
-				if (parsed.serverlist.hasOwnProperty(i) && i != 'length') {
-					parsed.serverlist.length = parseInt(i, 10) + 1;
+			for (let serverKey in res.response.servers) {
+				let server = res.response.servers[serverKey];
+				if (server.type == "CDN" || server.type == "SteamCache") {
+					servers.push(server);
 				}
 			}
 
-			this._contentServers = Array.prototype.slice.call(parsed.serverlist);
-			return accept({"servers": JSON.parse(JSON.stringify(this._contentServers))});
+			if (servers.length == 0) {
+				return reject(new Error("No content servers available"));
+			}
+
+			servers = servers.map((srv) => {
+				return {
+					"type": srv.type,
+					"sourceid": srv.source_id,
+					"cell": srv.cell_id,
+					"load": srv.load,
+					"preferred_server": srv.preferred_server,
+					"weightedload": srv.weighted_load,
+					"NumEntriesInClientList": srv.num_entries_in_client_list,
+					"Host": srv.host,
+					"vhost": srv.vhost,
+					"https_support": srv.https_support,
+					"usetokenauth": "1"
+				};
+			});
+
+			this._contentServers = servers;
+			this._contentServersTimestamp = Date.now();
+			// Return a copy of the array, not the original
+			return resolve({"servers": JSON.parse(JSON.stringify(servers))});
 		});
 	});
 };
@@ -78,28 +83,28 @@ SteamUser.prototype.getDepotDecryptionKey = function(appID, depotID, callback) {
 	appID = parseInt(appID, 10);
 	depotID = parseInt(depotID, 10);
 
-	return StdLib.Promises.callbackPromise(['key'], callback, (accept, reject) => {
-		this.storage.readFile("depot_key_" + appID + "_" + depotID + ".bin", (err, file) => {
-			if (file && file.length > 4 && Math.floor(Date.now() / 1000) - file.readUInt32LE(0) < (60 * 60 * 24 * 14)) {
-				return accept({"key": file.slice(4)});
+	return StdLib.Promises.callbackPromise(['key'], callback, async (accept, reject) => {
+		let filename = `depot_key_${appID}_${depotID}.bin`;
+		let file = await this._readFile(filename);
+		if (file && file.length > 4 && Math.floor(Date.now() / 1000) - file.readUInt32LE(0) < (60 * 60 * 24 * 14)) {
+			return accept({"key": file.slice(4)});
+		}
+
+		this._send(SteamUser.EMsg.ClientGetDepotDecryptionKey, {"depot_id": depotID, "app_id": appID}, async (body) => {
+			if (body.eresult != SteamUser.EResult.OK) {
+				return reject(Helpers.eresultError(body.eresult));
 			}
 
-			this._send(SteamUser.EMsg.ClientGetDepotDecryptionKey, {"depot_id": depotID, "app_id": appID}, (body) => {
-				if (body.eresult != SteamUser.EResult.OK) {
-					return reject(Helpers.eresultError(body.eresult));
-				}
+			if (body.depot_id != depotID) {
+				return reject(new Error("Did not receive decryption key for correct depot"));
+			}
 
-				if (body.depot_id != depotID) {
-					return reject(new Error("Did not receive decryption key for correct depot"));
-				}
+			let key = body.depot_encryption_key;
+			file = Buffer.concat([Buffer.alloc(4), key]);
+			file.writeUInt32LE(Math.floor(Date.now() / 1000), 0);
 
-				let key = body.depot_encryption_key;
-				let file = Buffer.concat([new Buffer(4), key]);
-				file.writeUInt32LE(Math.floor(Date.now() / 1000), 0);
-				this.storage.writeFile("depot_key_" + appID + "_" + depotID + ".bin", file, () => {
-					return accept({key});
-				});
-			});
+			await this._saveFile(filename, file);
+			return accept({key});
 		});
 	});
 };
@@ -115,7 +120,7 @@ SteamUser.prototype.getDepotDecryptionKey = function(appID, depotID, callback) {
 SteamUser.prototype.getCDNAuthToken = function(appID, depotID, hostname, callback) {
 	return StdLib.Promises.callbackPromise(['token', 'expires'], callback, (accept, reject) => {
 		if (this._contentServerTokens[depotID + '_' + hostname] && this._contentServerTokens[depotID + '_' + hostname].expires - Date.now() > (1000 * 60 * 60)) {
-			return accept(this._contentServerTokens[depotID + '_' + hostname].token);
+			return accept(this._contentServerTokens[depotID + '_' + hostname]);
 		}
 
 		this._send(SteamUser.EMsg.ClientGetCDNAuthToken, {
@@ -343,7 +348,7 @@ SteamUser.prototype.downloadFile = function(appID, depotID, fileManifest, output
 					}
 
 					outputFd = fd;
-					FS.truncate(outputFd, parseInt(fileManifest.size, 10), (err) => {
+					FS.ftruncate(outputFd, parseInt(fileManifest.size, 10), (err) => {
 						if (err) {
 							FS.closeSync(outputFd);
 							return reject(err);
@@ -374,7 +379,7 @@ SteamUser.prototype.downloadFile = function(appID, depotID, fileManifest, output
 					}
 				}
 
-				this.downloadChunk(appID, depotID, chunk.sha, servers[serverIdx], (err, data) => {
+				self.downloadChunk(appID, depotID, chunk.sha, servers[serverIdx], (err, data) => {
 					serversInUse[serverIdx] = false;
 
 					if (killed) {
@@ -506,29 +511,6 @@ SteamUser.prototype.getAppBetaDecryptionKeys = function(appID, password, callbac
 		});
 	});
 };
-
-// Handlers
-
-SteamUser.prototype._handlerManager.add(SteamUser.EMsg.ClientServerList, function(body) {
-	// It appears that each message of this type is for one server type.
-	let servers = {};
-
-	body.servers.forEach((server) => {
-		servers[server.server_type] = servers[server.server_type] || [];
-		servers[server.server_type].push(server);
-	});
-
-	for (let i in servers) {
-		if (servers.hasOwnProperty(i)) {
-			this.steamServers[i] = servers[i];
-		}
-	}
-
-	if (!this.contentServersReady && this.steamServers[SteamUser.EServerType.CS]) {
-		this.contentServersReady = true;
-		this.emit('contentServersReady');
-	}
-});
 
 // Private functions
 function download(url, hostHeader, destinationFilename, callback) {

@@ -5,6 +5,8 @@ const SteamID = require('steamid');
 const EOSType = require('../enums/EOSType.js');
 const EResult = require('../enums/EResult.js');
 
+const FRIEND_CODE_REPLACEMENTS = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'm', 'n', 'p', 'q', 'r', 't', 'v', 'w'];
+
 /**
  * If the input isn't already a SteamID object, converts it into one and returns it
  * @param input
@@ -21,6 +23,39 @@ exports.steamID = function(input) {
 	}
 
 	return new SteamID(input);
+};
+
+/**
+ * @param {SteamID} steamID
+ * @returns {string}
+ */
+exports.createFriendCode = function(steamID) {
+	let acctIdHex = steamID.accountid.toString(16);
+	let friendCode = '';
+
+	for (let i = 0; i < acctIdHex.length; i++) {
+		let char = parseInt(acctIdHex[i], 16);
+		friendCode += FRIEND_CODE_REPLACEMENTS[char];
+	}
+
+	let dashPos = Math.floor(friendCode.length / 2);
+	return friendCode.substring(0, dashPos) + '-' + friendCode.substring(dashPos);
+};
+
+/**
+ * @param {string} friendCode
+ * @returns {SteamID}
+ */
+exports.parseFriendCode = function(friendCode) {
+	friendCode = friendCode.replace(/-/g, '');
+	let acctIdHex = '';
+
+	for (let i = 0; i < friendCode.length; i++) {
+		let char = friendCode[i];
+		acctIdHex += FRIEND_CODE_REPLACEMENTS.indexOf(char).toString(16);
+	}
+
+	return new SteamID(`[U:1:${parseInt(acctIdHex, 16)}]`);
 };
 
 /**
@@ -43,10 +78,16 @@ exports.getInternalMachineID = function() {
 
 /**
  * Get an Error object for a particular EResult
- * @param {int} eresult
+ * @param {int|EResult|object} eresult - Either an EResult value, or an object that contains an eresult property. If undefined or is an object without an eresult property, will assume "Fail".
  * @returns {null|Error}
  */
 exports.eresultError = function(eresult) {
+	if (typeof eresult == 'undefined') {
+		eresult = EResult.Fail;
+	} else if (typeof eresult == 'object') {
+		eresult = eresult.eresult || EResult.Fail;
+	}
+
 	if (eresult == EResult.OK) {
 		// no error
 		return null;

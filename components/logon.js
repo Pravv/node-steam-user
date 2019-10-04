@@ -13,11 +13,12 @@ const WebSocketConnection = require('./connection_protocols/websocket.js');
 const EResult = SteamUser.EResult;
 
 const PROTOCOL_VERSION = 65580;
+const PRIVATE_IP_OBFUSCATION_MASK = 0xbaadf00d;
 
 SteamUser.prototype.logOn = function(details) {
 	// Delay the actual logon by one tick, so if users call logOn from the error event they won't get a crash because
 	// they appear to be already logged on (the steamID property is set to null only *after* the error event is emitted)
-	process.nextTick(() => {
+	process.nextTick(async () => {
 		if (this.steamID) {
 			throw new Error("Already logged on, cannot log on again");
 		}
@@ -40,10 +41,15 @@ SteamUser.prototype.logOn = function(details) {
 			// We're not logging on with saved details
 			details = details || {};
 
-			let maxUint32 = Math.pow(2, 32) - 1;
-			if (details.logonID && details.logonID > maxUint32) {
-				process.stderr.write("[steam-user] Warning: logonID " + details.logonID + " is greater than " + maxUint32 + " and has been truncated.\n");
-				details.logonID = maxUint32;
+			let logonId = details.logonID;
+			if (logonId) {
+				let maxUint32 = Math.pow(2, 32) - 1;
+				if (typeof logonId == 'string' && logonId.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/)) {
+					logonId = StdLib.IPv4.stringToInt(logonId) ^ PRIVATE_IP_OBFUSCATION_MASK;
+				} else if (typeof logonId == 'number' && logonId > maxUint32) {
+					console.error("[steam-user] Warning: logonID " + details.logonID + " is greater than " + maxUint32 + " and has been truncated.");
+					logonId = maxUint32;
+				}
 			}
 
 			this._logOnDetails = {
@@ -53,7 +59,7 @@ SteamUser.prototype.logOn = function(details) {
 				"auth_code": details.authCode,
 				"two_factor_code": details.twoFactorCode,
 				"should_remember_password": !!details.rememberPassword,
-				"obfustucated_private_ip": details.logonID || 0,
+				"obfuscated_private_ip": {"v4": logonId || 0},
 				"protocol_version": PROTOCOL_VERSION,
 				"supports_rate_limit_response": !!details.accountName,
 				"machine_name": details.accountName ? (details.machineName || "") : "",
@@ -72,7 +78,7 @@ SteamUser.prototype.logOn = function(details) {
 		if (this._logOnDetails.web_logon_nonce) {
 			this._logOnDetails.client_os_type = 4294966596;
 			this._logOnDetails.ui_mode = 4;
-			delete this._logOnDetails.obfustucated_private_ip;
+			delete this._logOnDetails.obfuscated_private_ip;
 			delete this._logOnDetails.cell_id;
 			delete this._logOnDetails.client_language;
 			delete this._logOnDetails.should_remember_password;
@@ -117,112 +123,99 @@ SteamUser.prototype.logOn = function(details) {
 			}
 		}
 
-		let self = this;
+		let files = await this._readFiles(filenames);
 
-		if (this.storage) {
-			this.storage.readFiles(filenames, readFileCallback);
-		} else {
-			readFileCallback(null, []);
-		}
-
-		function readFileCallback(err, files) {
-			files = files || [];
-
-			files.forEach(function(file) {
-				if (file.filename == 'cm_list.json' && file.contents) {
-					try {
-						self._cmList = JSON.parse(file.contents.toString('utf8'));
-					} catch (e) {
-						// don't care
-					}
+		files.forEach((file) => {
+			if (file.filename == 'cm_list.json' && file.contents) {
+				try {
+					this._cmList = JSON.parse(file.contents.toString('utf8'));
+				} catch (e) {
+					// don't care
 				}
+			}
 
-				if (file.filename.match(/^cellid/) && file.contents) {
-					let cellID = parseInt(file.contents.toString('utf8'), 10);
-					if (!isNaN(cellID)) {
-						self._logOnDetails.cell_id = cellID;
-					}
+			if (file.filename.match(/^cellid/) && file.contents) {
+				let cellID = parseInt(file.contents.toString('utf8'), 10);
+				if (!isNaN(cellID)) {
+					this._logOnDetails.cell_id = cellID;
 				}
+			}
 
-				if (file.filename.match(/^sentry/) && file.contents) {
-					sentry = file.contents;
-				}
+			if (file.filename.match(/^sentry/) && file.contents) {
+				sentry = file.contents;
+			}
 
-				if (file.filename == 'machineid.bin' && file.contents) {
-					machineID = file.contents;
-				}
-			});
+			if (file.filename == 'machineid.bin' && file.contents) {
+				machineID = file.contents;
+			}
+		});
 
-			if (self._cmList && (!self._cmList.time || Date.now() - self._cmList.time < (1000 * 60 * 60 * 24 * 7))) {
-				// proceed if we have a CM list already and it's less than 7 days old
-				gotCMList();
-			} else {
-				// Get the CM list from the API
-				self.emit('debug', "Getting CM list from WebAPI");
-				self._apiRequest("GET", "ISteamDirectory", "GetCMList", 1, {"cellid": self._logOnDetails.cell_id || 0}, function(err, res) {
+		if (!this._cmList || !this._cmList.time || Date.now() - this._cmList.time > (1000 * 60 * 60 * 24 * 7)) {
+			// CM list is out of date (more than 7 days old, or doesn't exist). Let's grab a new copy from the WebAPI
+			await new Promise((resolve, reject) => {
+				this.emit('debug', 'Getting CM list from WebAPI');
+				this._apiRequest("GET", "ISteamDirectory", "GetCMList", 1, {"cellid": this._logOnDetails.cell_id || 0}, (err, res) => {
 					if (err || !res.response || res.response.result != 1 || !res.response.serverlist) {
-						gotCMList(); // just fallback to the built-in list
+						return resolve(); // just fallback to the built-in list
 					} else {
-						self._cmList = {
+						this._cmList = {
 							"tcp_servers": Helpers.fixVdfArray(res.response.serverlist),
 							"websocket_servers": Helpers.fixVdfArray(res.response.serverlist_websockets),
 							"time": Date.now()
 						};
 
-						self._saveCMList();
-						gotCMList();
+						this._saveCMList();
+						resolve();
 					}
 				});
-			}
-
-			function gotCMList() {
-				if (!self._cmList) {
-					// Get built-in list as a last resort
-					self._cmList = require('../resources/servers.json');
-				}
-
-				// Sentry file
-				if (!self._logOnDetails.sha_sentryfile) {
-					if (sentry && sentry.length > 20) {
-						// Hash the sentry
-						let hash = Crypto.createHash('sha1');
-						hash.update(sentry);
-						sentry = hash.digest();
-					}
-
-					self._logOnDetails.sha_sentryfile = sentry;
-					self._logOnDetails.eresult_sentryfile = sentry ? 1 : 0;
-				}
-
-				// Machine ID
-				if (!anonLogin && !self._logOnDetails.machine_id) {
-					self._logOnDetails.machine_id = self._getMachineID(machineID);
-				}
-
-				// Do the login
-				if (self._logOnDetails._steamid) {
-					let sid = self._logOnDetails._steamid;
-					if (typeof sid == 'string') {
-						sid = new SteamID(sid);
-					}
-
-					self._tempSteamID = sid;
-				} else {
-					let sid = new SteamID();
-					sid.universe = SteamID.Universe.PUBLIC;
-					sid.type = anonLogin ? SteamID.Type.ANON_USER : SteamID.Type.INDIVIDUAL;
-					sid.instance = anonLogin ? SteamID.Instance.ALL : SteamID.Instance.DESKTOP;
-					sid.accountid = 0;
-					self._tempSteamID = sid;
-				}
-
-				if (anonLogin && self._logOnDetails.password) {
-					process.stderr.write("[steam-user] Warning: Logging into anonymous Steam account but a password was specified... did you specify your accountName improperly?\n");
-				}
-
-				self._doConnection();
-			}
+			});
 		}
+
+		if (!this._cmList) {
+			// Get built-in list as a last resort
+			this._cmList = require('../resources/servers.json');
+		}
+
+		// Sentry file
+		if (!this._logOnDetails.sha_sentryfile) {
+			if (sentry && sentry.length > 20) {
+				// Hash the sentry
+				let hash = Crypto.createHash('sha1');
+				hash.update(sentry);
+				sentry = hash.digest();
+			}
+
+			this._logOnDetails.sha_sentryfile = sentry;
+			this._logOnDetails.eresult_sentryfile = sentry ? 1 : 0;
+		}
+
+		// Machine ID
+		if (!anonLogin && !this._logOnDetails.machine_id) {
+			this._logOnDetails.machine_id = this._getMachineID(machineID);
+		}
+
+		// Do the login
+		if (this._logOnDetails._steamid) {
+			let sid = this._logOnDetails._steamid;
+			if (typeof sid == 'string') {
+				sid = new SteamID(sid);
+			}
+
+			this._tempSteamID = sid;
+		} else {
+			let sid = new SteamID();
+			sid.universe = SteamID.Universe.PUBLIC;
+			sid.type = anonLogin ? SteamID.Type.ANON_USER : SteamID.Type.INDIVIDUAL;
+			sid.instance = anonLogin ? SteamID.Instance.ALL : SteamID.Instance.DESKTOP;
+			sid.accountid = 0;
+			this._tempSteamID = sid;
+		}
+
+		if (anonLogin && this._logOnDetails.password) {
+			process.stderr.write("[steam-user] Warning: Logging into anonymous Steam account but a password was specified... did you specify your accountName improperly?\n");
+		}
+
+		this._doConnection();
 	});
 };
 
@@ -303,10 +296,7 @@ SteamUser.prototype._getMachineID = function(localFile) {
 		}
 
 		let file = getRandomID();
-
-		if (this.storage) {
-			this.storage.writeFile('machineid.bin', file);
-		}
+		this._saveFile('machineid.bin', file);
 
 		return file;
 	}
@@ -329,11 +319,11 @@ SteamUser.prototype._getMachineID = function(localFile) {
 };
 
 SteamUser.prototype._saveCMList = function() {
-	if (!this._cmList || !this.storage) {
+	if (!this._cmList) {
 		return;
 	}
 
-	this.storage.writeFile('cm_list.json', JSON.stringify(this._cmList, null, "\t"));
+	this._saveFile('cm_list.json', JSON.stringify(this._cmList, null, "\t"));
 };
 
 SteamUser.prototype.relog = function() {
@@ -363,9 +353,13 @@ SteamUser.prototype._handlerManager.add(SteamUser.EMsg.ClientLogOnResponse, func
 			delete this._logOnDetails.two_factor_code;
 			this.logOnResult = body;
 
-			this.publicIP = StdLib.IPv4.intToString(body.public_ip);
+			this.publicIP = null;
+			if (body.public_ip && body.public_ip.v4) {
+				this.publicIP = StdLib.IPv4.intToString(body.public_ip.v4);
+			}
 			this.cellID = body.cell_id;
 			this.vanityURL = body.vanity_url;
+			this.contentServersReady = true;
 
 			this._connectTime = Date.now();
 			this._connectionCount = 0;
@@ -384,9 +378,7 @@ SteamUser.prototype._handlerManager.add(SteamUser.EMsg.ClientLogOnResponse, func
 				}, 5000);
 			}
 
-			if (this.storage) {
-				this.storage.saveFile('cellid-' + Helpers.getInternalMachineID() + '.txt', body.cell_id);
-			}
+			this._saveFile('cellid-' + Helpers.getInternalMachineID() + '.txt', body.cell_id);
 
 			let parental = body.parental_settings ? Messages.decodeProto(Schema.ParentalSettings, body.parental_settings) : null;
 			if (parental && parental.salt && parental.passwordhash) {
@@ -398,7 +390,15 @@ SteamUser.prototype._handlerManager.add(SteamUser.EMsg.ClientLogOnResponse, func
 				parental.steamid = sid;
 			}
 
+			if (!this.steamID && body.client_supplied_steamid) {
+				// This should ordinarily not happen. this.steamID is supposed to be set in messages.js according to
+				// the SteamID in the message header. But apparently, sometimes Steam doesn't set that SteamID
+				// appropriately in the log on response message. ¯\_(ツ)_/¯
+				this.steamID = new SteamID(body.client_supplied_steamid);
+			}
+
 			this.emit('loggedOn', body, parental);
+			this.emit('contentServersReady');
 
 			this._getChangelistUpdate();
 
@@ -492,10 +492,14 @@ SteamUser.prototype._handleLogOff = function(result, msg) {
 
 	delete this.publicIP;
 	delete this.cellID;
+	this.contentServersReady = false;
 
 	this._gcTokens = [];
 	this._connectionCount = 0;
 	this._connectTime = 0;
+	this._contentServers = [];
+	this._contentServersTimestamp = 0;
+	this._contentServerTokens = {};
 
 	this._clearChangelistUpdateTimer();
 	clearInterval(this._heartbeatInterval);

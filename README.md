@@ -11,10 +11,13 @@ be a self-contained module which provides all the functionality expected of a St
 
 [Subscribe to release announcements](https://github.com/DoctorMcKay/node-steam-user/releases.atom)
 
-This reports anonymous usage statistics to the author.
-[See here](https://github.com/DoctorMcKay/node-stats-reporter) for more information.
-
 **Have a question about the module or coding in general? *Do not create a GitHub issue.* GitHub issues are for feature requests and bug reports. Instead, post in the [dedicated forum](https://dev.doctormckay.com/forum/7-node-steam-user/). Such issues may be ignored!**
+
+## Installation
+
+Install it from [npm](https://www.npmjs.com/package/steam-user):
+
+    $ npm install steam-user
 
 # Contents
 - [Patterns](#patterns-)
@@ -463,7 +466,8 @@ You can provide either an entire sentryfile (preferred), or a Buffer containing 
 	- `authCode` - If you have a Steam Guard email code, you can provide it here. You might not need to, see the [`steamGuard`](#steamguard) event. (Added in 1.9.0)
 	- `twoFactorCode` - If you have a Steam Guard mobile two-factor authentication code, you can provide it here. You might not need to, see the [`steamGuard`](#steamguard) event. (Added in 1.9.0)
 	- `rememberPassword` - `true` if you want to get a login key which can be used in lieu of a password for subsequent logins. `false` or omitted otherwise.
-	- `logonID` - A 32-bit integer to identify this login. The official Steam client derives this from your machine's private IP (it's the `obfustucated_private_ip` field in `CMsgClientLogOn`). If you try to logon twice to the same account from the same public IP with the same `logonID`, the first session will be kicked with reason `SteamUser.EResult.LogonSessionReplaced`. Defaults to `0` if not specified.
+	- `logonID` - A 32-bit integer to identify this login. The official Steam client derives this from your machine's private IP (it's the `obfuscated_private_ip` field in `CMsgClientLogOn`). If you try to logon twice to the same account from the same public IP with the same `logonID`, the first session will be kicked with reason `SteamUser.EResult.LogonSessionReplaced`. Defaults to `0` if not specified.
+		- As of v4.13.0, this can also be an IPv4 address as a string, in dotted-decimal notation (e.g. `"192.168.1.5"`)
 	- `machineName` - A string containing the name of this machine that you want to report to Steam. This will be displayed on steamcommunity.com when you view your games list (when logged in).
 	- `clientOS` - A [number](https://github.com/DoctorMcKay/node-steam-user/blob/master/enums/EOSType.js) to identify your client OS. Auto-detected if you don't provide one.
 	- `dontRememberMachine` - If you're providing an `authCode` but you don't want Steam to remember this sentryfile, pass `true` here.
@@ -627,6 +631,22 @@ Gets when you last changed various account credentials.
 **v3.10.0 or later is required to use this method**
 
 Gets your account's auth secret, which is the pre-shared key used for in-home streaming.
+
+### getPrivacySettings(callback)
+- `callback` - A function to be called when the requested data is available
+	- `err` - An `Error` object on failure, or `null` on success
+	- `response` - The response object
+		- `privacy_state` - The [privacy state](https://github.com/DoctorMcKay/node-steam-user/blob/master/resources/EPrivacyState.js) of your profile
+		- `privacy_state_inventory` - The [privacy state](https://github.com/DoctorMcKay/node-steam-user/blob/master/resources/EPrivacyState.js) of your Steam inventory
+		- `privacy_state_gifts` - The [privacy state](https://github.com/DoctorMcKay/node-steam-user/blob/master/resources/EPrivacyState.js) of your Steam gift inventory
+		- `privacy_state_ownedgames` - The [privacy state](https://github.com/DoctorMcKay/node-steam-user/blob/master/resources/EPrivacyState.js) of your owned games list
+		- `privacy_state_playtime` - The [privacy state](https://github.com/DoctorMcKay/node-steam-user/blob/master/resources/EPrivacyState.js) of your game playtime
+		- `privacy_state_friendslist` - The [privacy state](https://github.com/DoctorMcKay/node-steam-user/blob/master/resources/EPrivacyState.js) of your friends list
+
+**v4.11.0 or later is required to use this method**
+
+Retrieves your account's privacy settings. You can't change your privacy state using steam-user; you'll need to use
+[steamcommunity](https://github.com/DoctorMcKay/node-steamcommunity/wiki/SteamCommunity#profilesettingssettings-callback).
 
 ### kickPlayingSession([callback])
 - `callback` - Optional. A function to be called once Steam receives and responds to this request.
@@ -916,6 +936,76 @@ Blocks all communication with a specified user.
 
 Unblocks all communication with a specified user.
 
+### createQuickInviteLink([options,] callback)
+- `options` - Optional. An object with zero or more of these properties:
+	- `invite_limit` - How many times this link can be used before it's no longer valid. Defaults to 1.
+- `callback` - Called when the request completes
+	- `err` - An `Error` object on failure, or `null` on success
+	- `response` - The response object
+		- `token` - An object with these properties:
+			- `invite_link` - The link that can be used to add your account as a friend directly
+			- `invite_token` - Just the token part of the link
+			- `invite_limit` - How many times the link can be used before it's no longer valid
+			- `invite_duration` - How many seconds are left until the link expires. `null` if it never expires.
+			- `time_created` - A `Date` object representing when the link was created
+			- `valid` - `true` if the link is currently valid, or `false` if not
+
+**v4.11.0 or later is required to use this method**
+
+Creates a quick-invite link that can be used by anyone who has it to add you to their friends list without needing to
+send an invite that you must to approve.
+
+### listQuickInviteLinks(callback)
+- `callback` - Called when the request completes
+	- `err` - An `Error` object on failure, or `null` on success
+	- `response` - The response object
+		- `tokens` - An array of objects, each of which is identical to the output of `createQuickInviteLink`
+
+**v4.11.0 or later is required to use this method**
+
+Retrieves the list of quick-invite links on your account. Links that you've revoked won't appear here.
+
+### revokeQuickInviteLink(linkOrToken[, callback])
+- `linkOrToken` - Either the full link, or just the token part of the link
+- `callback` - Optional. Called when the request completes
+	- `err` - An `Error` object on failure, or `null` on success
+
+**v4.11.0 or later is required to use this method**
+
+Revokes a quick-invite link. Can also be used to delete an already-used code from `listQuickInviteLinks`.
+
+### getQuickInviteLinkSteamID(link)
+- `link` - The full quick-invite link
+
+**v4.11.0 or later is required to use this method**
+
+Decodes a quick-invite link and returns a `SteamID` object representing the user account to whom this link belongs.
+Returns `null` if the link is not well-formed.
+
+This happens offline and thus returns immediately, without need for a callback or Promise.
+
+### checkQuickInviteLinkValidity(link, callback)
+- `link` - The full quick-invite link
+- `callback` - Called when the request completes
+	- `err` - An `Error` object on failure, or `null` on success
+	- `response` - The response object
+		- `valid` - `true` if the link exists and is valid, `false` if the link exists but is not valid (e.g. it's already been used); it's an error if the link doesn't exist at all
+		- `steamid` - A `SteamID` object representing who the link belongs to
+		- `invite_duration` - How many seconds are left until the link expires. `null` if it never expires.
+
+**v4.11.0 or later is required to use this method**
+
+Checks whether a quick-invite link is valid.
+
+### redeemQuickInviteLink(link[, callback])
+- `link` - The full quick-invite link
+- `callback` - Optional. Called when the request completes
+	- `err` - An `Error` object on failure, or `null` on success
+
+**v4.11.0 or later is required to use this method**
+
+Redeems a quick-invite link and adds the user to your friends list.
+
 ### getPersonas(steamids[, callback])
 - `steamids` - An array of `SteamID` objects or strings which can parse into `SteamID` objects
 - `callback` - Optional. Called when the requested data is available.
@@ -1104,6 +1194,11 @@ Removes a friend to a friends group (also known as a tag within the official Ste
 **v1.9.0 or later is required to use this method**
 
 Send a trade request to the specified user. Listen for the [`tradeResponse`](#traderesponse) event for their response.
+
+**Note: Valve seems to have dropped real-time trade requests from the Steam UI, in favor of trade offers. However,
+real-time trades are not fully deprecated as they can still be initiated from inside of some games, for example TF2.
+Users using the Steam client will not see real-time trade requests that your bots send them, but bots should still be
+able to send and accept trade requests amongst themselves.**
 
 ### cancelTradeRequest(steamID)
 - `steamID` - Either a `SteamID` object or a string which can parse into one
