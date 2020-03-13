@@ -47,7 +47,7 @@ SteamUser.prototype.logOn = function(details) {
 				if (typeof logonId == 'string' && logonId.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/)) {
 					logonId = StdLib.IPv4.stringToInt(logonId) ^ PRIVATE_IP_OBFUSCATION_MASK;
 				} else if (typeof logonId == 'number' && logonId > maxUint32) {
-					console.error("[steam-user] Warning: logonID " + details.logonID + " is greater than " + maxUint32 + " and has been truncated.");
+					this._warn(`logonID ${details.logonID} is greater than ${maxUint32} and has been truncated.`);
 					logonId = maxUint32;
 				}
 			}
@@ -211,8 +211,8 @@ SteamUser.prototype.logOn = function(details) {
 			this._tempSteamID = sid;
 		}
 
-		if (anonLogin && this._logOnDetails.password) {
-			process.stderr.write("[steam-user] Warning: Logging into anonymous Steam account but a password was specified... did you specify your accountName improperly?\n");
+		if (anonLogin && (this._logOnDetails.password || this._logOnDetails.login_key)) {
+			this._warn('Logging into anonymous Steam account but a password was specified... did you specify your accountName improperly?');
 		}
 
 		this._doConnection();
@@ -261,6 +261,7 @@ SteamUser.prototype.logOff = function() {
  */
 SteamUser.prototype._disconnect = function(suppressLogoff) {
 	this._clearChangelistUpdateTimer();
+	clearTimeout(this._logonTimeout); // cancel any queued reconnect attempt
 
 	if (this.steamID && !suppressLogoff) {
 		this._loggingOff = true;
@@ -344,7 +345,7 @@ SteamUser.prototype.relog = function() {
 SteamUser.prototype._handlerManager.add(SteamUser.EMsg.ClientLogOnResponse, function(body) {
 	switch (body.eresult) {
 		case EResult.OK:
-			delete this._logonTimeout; // success, so reset reconnect timer
+			delete this._logonTimeoutDuration; // success, so reset reconnect timer
 
 			this._logOnDetails.last_session_id = this._sessionID;
 			this._logOnDetails.client_instance_id = body.client_instance_id;
@@ -397,6 +398,15 @@ SteamUser.prototype._handlerManager.add(SteamUser.EMsg.ClientLogOnResponse, func
 				this.steamID = new SteamID(body.client_supplied_steamid);
 			}
 
+			if (!this.steamID) {
+				// This should never happen, but apparently sometimes it does
+				this._disconnect(true);
+				let err = new Error('BadResponse');
+				err.eresult = EResult.BadResponse;
+				this.emit('error', err);
+				return;
+			}
+
 			this.emit('loggedOn', body, parental);
 			this.emit('contentServersReady');
 
@@ -422,7 +432,7 @@ SteamUser.prototype._handlerManager.add(SteamUser.EMsg.ClientLogOnResponse, func
 		case EResult.AccountLoginDeniedNeedTwoFactor:
 		case EResult.TwoFactorCodeMismatch: {
 			// server is up, so reset logon timer
-			delete this._logonTimeout;
+			delete this._logonTimeoutDuration;
 
 			this._disconnect(true);
 
@@ -438,10 +448,10 @@ SteamUser.prototype._handlerManager.add(SteamUser.EMsg.ClientLogOnResponse, func
 			this.emit('debug', 'Log on response: ' + EResult[body.eresult]);
 			this._disconnect(true);
 
-			let timer = this._logonTimeout || 1000;
-			this._logonTimeout = Math.min(timer * 2, 60000); // exponential backoff, max 1 minute
+			let timer = this._logonTimeoutDuration || 1000;
+			this._logonTimeoutDuration = Math.min(timer * 2, 60000); // exponential backoff, max 1 minute
 
-			setTimeout(() => {
+			this._logonTimeout = setTimeout(() => {
 				this.logOn(true);
 			}, timer);
 
@@ -449,7 +459,7 @@ SteamUser.prototype._handlerManager.add(SteamUser.EMsg.ClientLogOnResponse, func
 
 		default:
 			// server is up, so reset logon timer
-			delete this._logonTimeout;
+			delete this._logonTimeoutDuration;
 
 			let error = new Error(EResult[body.eresult] || body.eresult);
 			error.eresult = body.eresult;
@@ -520,7 +530,7 @@ SteamUser.prototype._handleLogOff = function(result, msg) {
 
 		// if we're manually relogging, or we got disconnected because steam went down, enqueue a reconnect
 		if (!this._loggingOff || this._relogging) {
-			setTimeout(() => {
+			this._logonTimeout = setTimeout(() => {
 				this.logOn(true);
 			}, 1000);
 		}
