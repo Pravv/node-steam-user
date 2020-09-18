@@ -53,25 +53,25 @@ SteamUser.prototype.logOn = function(details) {
 			}
 
 			this._logOnDetails = {
-				"account_name": details.accountName,
-				"password": details.password,
-				"login_key": details.loginKey,
-				"auth_code": details.authCode,
-				"two_factor_code": details.twoFactorCode,
-				"should_remember_password": !!details.rememberPassword,
-				"obfuscated_private_ip": {"v4": logonId || 0},
-				"protocol_version": PROTOCOL_VERSION,
-				"supports_rate_limit_response": !!details.accountName,
-				"machine_name": details.accountName ? (details.machineName || "") : "",
-				"ping_ms_from_cell_search": details.accountName ? 4 + Math.floor(Math.random() * 30) : 0, // fake ping value
-				"client_language": details.accountName ? "english" : "",
-				"client_os_type": Number.isInteger(details.clientOS) ? details.clientOS : Helpers.getOsType(),
-				"anon_user_target_account_name": details.accountName ? "" : "anonymous",
-				"steamguard_dont_remember_computer": !!(details.accountName && details.authCode && details.dontRememberMachine),
-				"ui_mode": undefined,
-				"chat_mode": 2, // enable new chat
-				"web_logon_nonce": details.webLogonToken && details.steamID ? details.webLogonToken : undefined,
-				"_steamid": details.steamID
+				account_name: details.accountName,
+				password: details.password,
+				login_key: details.loginKey,
+				auth_code: details.authCode,
+				two_factor_code: details.twoFactorCode,
+				should_remember_password: !!details.rememberPassword,
+				obfuscated_private_ip: {v4: logonId || 0},
+				protocol_version: PROTOCOL_VERSION,
+				supports_rate_limit_response: !!details.accountName,
+				machine_name: details.accountName ? (details.machineName || '') : '',
+				ping_ms_from_cell_search: details.accountName ? 4 + Math.floor(Math.random() * 30) : 0, // fake ping value
+				client_language: details.accountName ? 'english' : '',
+				client_os_type: Number.isInteger(details.clientOS) ? details.clientOS : Helpers.getOsType(),
+				anon_user_target_account_name: details.accountName ? '' : 'anonymous',
+				steamguard_dont_remember_computer: !!(details.accountName && details.authCode && details.dontRememberMachine),
+				ui_mode: undefined,
+				chat_mode: 2, // enable new chat
+				web_logon_nonce: details.webLogonToken && details.steamID ? details.webLogonToken : undefined,
+				_steamid: details.steamID
 			};
 		}
 
@@ -152,23 +152,18 @@ SteamUser.prototype.logOn = function(details) {
 
 		if (!this._cmList || !this._cmList.time || Date.now() - this._cmList.time > (1000 * 60 * 60 * 24 * 7)) {
 			// CM list is out of date (more than 7 days old, or doesn't exist). Let's grab a new copy from the WebAPI
-			await new Promise((resolve, reject) => {
-				this.emit('debug', 'Getting CM list from WebAPI');
-				this._apiRequest("GET", "ISteamDirectory", "GetCMList", 1, {"cellid": this._logOnDetails.cell_id || 0}, (err, res) => {
-					if (err || !res.response || res.response.result != 1 || !res.response.serverlist) {
-						return resolve(); // just fallback to the built-in list
-					} else {
-						this._cmList = {
-							"tcp_servers": Helpers.fixVdfArray(res.response.serverlist),
-							"websocket_servers": Helpers.fixVdfArray(res.response.serverlist_websockets),
-							"time": Date.now()
-						};
-
-						this._saveCMList();
-						resolve();
-					}
-				});
-			});
+			this.emit('debug', 'Getting CM list from WebAPI');
+			try {
+				let res = await this._apiRequest('GET', 'ISteamDirectory', 'GetCMList', 1, {cellid: this._logOnDetails.cell_id || 0});
+				this._cmList = {
+					tcp_servers: Helpers.fixVdfArray(res.response.serverlist),
+					websocket_servers: Helpers.fixVdfArray(res.response.serverlist_websockets),
+					time: Date.now()
+				};
+				this._saveCMList();
+			} catch (ex) {
+				this.emit('debug', `WebAPI error getting CMList: ${ex.message}`);
+			}
 		}
 
 		if (!this._cmList) {
@@ -248,6 +243,35 @@ SteamUser.prototype._doConnection = function() {
 };
 
 /**
+ * Send the actual ClientLogOn message.
+ * @private
+ */
+SteamUser.prototype._sendLogOn = function() {
+	// Realistically, this should never need to elapse since at this point we have already established a successful connection
+	// with the CM. But sometimes, Steam appears to never respond to the logon message. Valve.
+	this._logonMsgTimeout = setTimeout(() => {
+		this.emit('debug', 'Logon message timeout elapsed. Attempting relog.');
+		this._disconnect(true);
+		this._enqueueLogonAttempt();
+	}, 5000);
+
+	this._send(this._logOnDetails.game_server_token ? SteamUser.EMsg.ClientLogonGameServer : SteamUser.EMsg.ClientLogon, this._logOnDetails);
+};
+
+/**
+ * Enqueue another logon attempt.
+ * Used after we get ServiceUnavailable, TryAnotherCM, or a timeout waiting for ClientLogOnResponse.
+ * @private
+ */
+SteamUser.prototype._enqueueLogonAttempt = function() {
+	let timer = this._logonTimeoutDuration || 1000;
+	this._logonTimeoutDuration = Math.min(timer * 2, 60000); // exponential backoff, max 1 minute
+	this._logonTimeout = setTimeout(() => {
+		this.logOn(true);
+	}, timer);
+};
+
+/**
  * Log off of Steam gracefully.
  */
 SteamUser.prototype.logOff = function() {
@@ -262,6 +286,7 @@ SteamUser.prototype.logOff = function() {
 SteamUser.prototype._disconnect = function(suppressLogoff) {
 	this._clearChangelistUpdateTimer();
 	clearTimeout(this._logonTimeout); // cancel any queued reconnect attempt
+	clearTimeout(this._logonMsgTimeout);
 
 	if (this.steamID && !suppressLogoff) {
 		this._loggingOff = true;
@@ -343,6 +368,9 @@ SteamUser.prototype.relog = function() {
 // Handlers
 
 SteamUser.prototype._handlerManager.add(SteamUser.EMsg.ClientLogOnResponse, function(body) {
+	clearTimeout(this._logonMsgTimeout);
+	delete this._logonMsgTimeout;
+
 	switch (body.eresult) {
 		case EResult.OK:
 			delete this._logonTimeoutDuration; // success, so reset reconnect timer
@@ -447,14 +475,7 @@ SteamUser.prototype._handlerManager.add(SteamUser.EMsg.ClientLogOnResponse, func
 		case EResult.TryAnotherCM:
 			this.emit('debug', 'Log on response: ' + EResult[body.eresult]);
 			this._disconnect(true);
-
-			let timer = this._logonTimeoutDuration || 1000;
-			this._logonTimeoutDuration = Math.min(timer * 2, 60000); // exponential backoff, max 1 minute
-
-			this._logonTimeout = setTimeout(() => {
-				this.logOn(true);
-			}, timer);
-
+			this._enqueueLogonAttempt();
 			break;
 
 		default:

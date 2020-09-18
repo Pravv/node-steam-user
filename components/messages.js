@@ -121,8 +121,16 @@ protobufs[EMsg.ClientPlayingSessionState] = Schema.CMsgClientPlayingSessionState
 protobufs[EMsg.ClientToGC] = Schema.CMsgGCClient;
 protobufs[EMsg.ClientFromGC] = Schema.CMsgGCClient;
 protobufs[EMsg.ClientRichPresenceUpload] = Schema.CMsgClientRichPresenceUpload;
+protobufs[EMsg.ClientRichPresenceRequest] = Schema.CMsgClientRichPresenceRequest;
+protobufs[EMsg.ClientRichPresenceInfo] = Schema.CMsgClientRichPresenceInfo;
 protobufs[EMsg.ClientGetEmoticonList] = Schema.CMsgClientGetEmoticonList;
 protobufs[EMsg.ClientEmoticonList] = Schema.CMsgClientEmoticonList;
+protobufs[EMsg.ClientGetAuthorizedDevicesResponse] = Schema.CMsgClientGetAuthorizedDevices;
+protobufs[EMsg.ClientAuthorizeLocalDeviceRequest] = Schema.CMsgClientAuthorizeLocalDeviceRequest;
+protobufs[EMsg.ClientAuthorizeLocalDeviceResponse] = Schema.CMsgClientAuthorizeLocalDevice;
+protobufs[EMsg.ClientDeauthorizeDeviceRequest] = Schema.CMsgClientDeauthorizeDeviceRequest;
+protobufs[EMsg.ClientDeauthorizeDevice] = Schema.CMsgClientDeauthorizeDevice;
+protobufs[EMsg.ClientUseLocalDeviceAuthorizations] = Schema.CMsgClientUseLocalDeviceAuthorizations;
 
 // Unified protobufs
 protobufs['GameServers.GetServerList#1_Request'] = Schema.CGameServers_GetServerList_Request;
@@ -155,6 +163,16 @@ protobufs['Player.GetEmoticonList#1_Request'] = Schema.CPlayer_GetEmoticonList_R
 protobufs['Player.GetEmoticonList#1_Response'] = Schema.CPlayer_GetEmoticonList_Response;
 protobufs['Player.GetPrivacySettings#1_Request'] = Schema.CPlayer_GetPrivacySettings_Request;
 protobufs['Player.GetPrivacySettings#1_Response'] = Schema.CPlayer_GetPrivacySettings_Response;
+protobufs['Player.GetOwnedGames#1_Request'] = Schema.CPlayer_GetOwnedGames_Request;
+protobufs['Player.GetOwnedGames#1_Response'] = Schema.CPlayer_GetOwnedGames_Response;
+protobufs['Player.GetProfileItemsOwned#1_Request'] = Schema.CPlayer_GetProfileItemsOwned_Request;
+protobufs['Player.GetProfileItemsOwned#1_Response'] = Schema.CPlayer_GetProfileItemsOwned_Response;
+protobufs['Player.GetProfileItemsEquipped#1_Request'] = Schema.CPlayer_GetProfileItemsEquipped_Request;
+protobufs['Player.GetProfileItemsEquipped#1_Response'] = Schema.CPlayer_GetProfileItemsEquipped_Response;
+protobufs['Player.GetProfileBackground#1_Request'] = Schema.CPlayer_GetProfileBackground_Request;
+protobufs['Player.GetProfileBackground#1_Response'] = Schema.CPlayer_GetProfileBackground_Response;
+protobufs['Player.SetProfileBackground#1_Request'] = Schema.CPlayer_SetProfileBackground_Request;
+protobufs['Player.SetProfileBackground#1_Response'] = Schema.CPlayer_SetProfileBackground_Response;
 protobufs['PlayerClient.NotifyFriendNicknameChanged#1'] = Schema.CPlayer_FriendNicknameChanged_Notification;
 protobufs['Econ.GetAssetClassInfo#1_Request'] = Schema.CEcon_GetAssetClassInfo_Request;
 protobufs['Econ.GetAssetClassInfo#1_Response'] = Schema.CEcon_GetAssetClassInfo_Response;
@@ -283,6 +301,14 @@ protobufs['UserAccount.RedeemFriendInviteToken#1_Request'] = Schema.CUserAccount
 protobufs['UserAccount.RedeemFriendInviteToken#1_Response'] = Schema.CUserAccount_RedeemFriendInviteToken_Response;
 protobufs['UserAccount.RevokeFriendInviteToken#1_Request'] = Schema.CUserAccount_RevokeFriendInviteToken_Request;
 protobufs['UserAccount.RevokeFriendInviteToken#1_Response'] = Schema.CUserAccount_RevokeFriendInviteToken_Response;
+protobufs['DeviceAuth.GetOwnAuthorizedDevices#1_Request'] = Schema.CDeviceAuth_GetOwnAuthorizedDevices_Request;
+protobufs['DeviceAuth.GetOwnAuthorizedDevices#1_Response'] = Schema.CDeviceAuth_GetOwnAuthorizedDevices_Response;
+protobufs['DeviceAuth.AddAuthorizedBorrowers#1_Request'] = Schema.CDeviceAuth_AddAuthorizedBorrowers_Request;
+protobufs['DeviceAuth.AddAuthorizedBorrowers#1_Response'] = Schema.CDeviceAuth_AddAuthorizedBorrowers_Response;
+protobufs['DeviceAuth.RemoveAuthorizedBorrowers#1_Request'] = Schema.CDeviceAuth_RemoveAuthorizedBorrowers_Request;
+protobufs['DeviceAuth.RemoveAuthorizedBorrowers#1_Response'] = Schema.CDeviceAuth_RemoveAuthorizedBorrowers_Response;
+protobufs['DeviceAuth.GetAuthorizedBorrowers#1_Request'] = Schema.CDeviceAuth_GetAuthorizedBorrowers_Request;
+protobufs['DeviceAuth.GetAuthorizedBorrowers#1_Response'] = Schema.CDeviceAuth_GetAuthorizedBorrowers_Response;
 
 /**
  * Encode a protobuf.

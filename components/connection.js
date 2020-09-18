@@ -5,19 +5,26 @@ const SteamCrypto = require('@doctormckay/steam-crypto');
 const SteamUser = require('../index.js');
 
 SteamUser.prototype._handleConnectionClose = function() {
+	clearTimeout(this._logonMsgTimeout);
+	delete this._logonMsgTimeout;
+
 	if (!this.steamID) {
 		// connection closed while connecting; reconnect
 		clearInterval(this._heartbeatInterval);
-		this._doConnection();
+		setTimeout(() => this._doConnection(), 1000);
 	} else {
 		// connection closed while we were connected; fire logoff
-		this._handleLogOff(SteamUser.EResult.NoConnection, "NoConnection");
+		this._handleLogOff(SteamUser.EResult.NoConnection, 'NoConnection');
 	}
 };
 
 // Handlers
 
 SteamUser.prototype._handlerManager.add(SteamUser.EMsg.ChannelEncryptRequest, function(body) {
+	if (!this._connection || !this._connection.stream) { // cannot begin login without a socket, abort
+		return;
+	}
+	
 	this._connection.stream.setTimeout(0);
 
 	let protocol = body.readUint32();
@@ -57,5 +64,5 @@ SteamUser.prototype._handlerManager.add(SteamUser.EMsg.ChannelEncryptResult, fun
 	delete this._connection._tempSessionKey;
 
 	this.emit('Encryption success; now logging on');
-	this._send(this._logOnDetails.game_server_token ? SteamUser.EMsg.ClientLogonGameServer : SteamUser.EMsg.ClientLogon, this._logOnDetails);
+	this._sendLogOn();
 });

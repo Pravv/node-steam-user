@@ -28,6 +28,9 @@ Install it from [npm](https://www.npmjs.com/package/steam-user):
 - [Methods](#methods-)
 - [Events](#events-)
 
+Some of the documentation for `SteamUser`, especially documentation for experimental features (but not exclusively),
+is located in [the GitHub wiki](https://github.com/DoctorMcKay/node-steam-user/wiki).
+
 # Patterns [^](#contents)
 
 There are a number of coding patterns that are repeated throughout `SteamUser`. **Please read this section in its
@@ -237,7 +240,7 @@ Defaults to `Auto`.
 ### language
 
 Set this to the full name of a language (e.g. "english" or "spanish") to localize specific things within steam-user.
-Currently this is only used to localize `rich_presence_string` in [`user`](#user) event data.
+Currently this is only used to localize `rich_presence_string` in [`user`](#user) event data and in `requestRichPresence`.
 
 Added in 4.0.0.
 
@@ -576,6 +579,7 @@ You'll be sent an SMS with an activation code that you'll need to provide to `fi
 Properties of note in the `response` object:
 - `status` - A value from `EResult`. If this is not `OK` (1), then the request failed.
 - `shared_secret` - This is your secret that's used for two-factor authentication.
+- `identity_secret` - This is your secret that's used for trade confirmation.
 - `revocation_code` - You will need this in the future to disable two-factor authentication.
 
 ### finalizeTwoFactor(secret, activationCode, callback)
@@ -1061,6 +1065,41 @@ This will subsequently be parsed like this:
 Requests localized rich presence strings for a particular app in the given language. This will allow you to decode the
 `rich_presence` array in the [`user`](#user) event into the localized string displayed in the Steam client.
 
+### requestRichPresence(appID, steamIDs, callback)
+- `appID` - The ID of the app for which you want to get rich presence data for
+- `steamIDs` - An array of SteamID objects or strings that can parse into SteamID objects
+- `language` - Optional. A string containing a full language name (e.g. `'english'` or `'spanish'`). Defaults to language passed in constructor or `setOption` if omitted.
+- `callback` - Called when the requested data is available.
+	- `err` - An `Error` object on failure, or `null` on success
+	- `response` - The response object
+	    - `users` - An object whose keys are 64-bit SteamIDs (as strings) and whose values are objects containing the received rich presence data. If no data was received for a SteamID there will be no key for that SteamID (and therefore no value).
+
+**v4.18.0 or later is required to use this method**
+
+Requests rich presence key/value data and localized strings as displayed in Steam for a list of given users, for a given
+app. You do not need to be friends with the requested users. Response object looks like this:
+
+```json
+{
+    "users": {
+        "76561198006409530": {
+            "richPresence": {
+                "status": "Playing CS:GO",
+                "version": "13765",
+                "time": "15.851017",
+                "game:state": "lobby",
+                "steam_display": "#display_Menu",
+                "connect": "+gcconnectG02C0193A"
+            },
+            "localizedString": "Playing CS:GO"
+        }
+    }
+}
+```
+
+If the Steam display string cannot be localized, then `localizedString` will be null. This is the case when there exists
+no translation for the language you selected.
+
 ### getSteamLevels(steamids, callback)
 - `steamids` - An array of `SteamID` objects or strings that can parse into `SteamID` objects
 - `callback` - Called when the requested data is available.
@@ -1100,7 +1139,7 @@ you want to be doubly sure.
 ### setNickname(steamID, nickname[, callback])
 - `steamID` - The SteamID of the user on whom you want to set a nickname, as a `SteamID` object or a string that can parse into one
 - `nickname` - The user's new nickname, as a string. Empty string to remove.
-- `callback` - Optional. Emitted when the request completes.
+- `callback` - Optional. Called when the request completes.
     - `err` - An `Error` object on failure or `null` on success.
 
 **v3.15.0 or later is required to use this method**
@@ -1122,6 +1161,94 @@ wasn't saved on the server. You can detect this case by calling `getNicknames`.
 **v3.8.0 or later is required to use this method**
 
 Gets your own Steam Level, and the level you have on a badge for a particular game.
+
+### getUserOwnedApps(steamID[, options], callback)
+- `steamID` - Either a `SteamID` object or a string that can parse into one
+- `options` - Optional. An object with zero or more of these properties:
+    - `includePlayedFreeGames` - Set to `true` to include free games that the user has used before. Default `false`.
+    - `filterAppids` - Pass an array of numeric AppIDs here to only retrieve those apps
+    - `includeFreeSub` - Set to `true` to include apps owned through Steam Sub 0
+- `callback` - Called when the request completes.
+    - `err` - An `Error` object on failure or `null` on success.
+    - `response` - The response object
+        - `game_count` - A number indicating how many total apps this user owns
+        - `games` - An array of objects:
+            - `appid` - The ID of the app
+            - `name` - The name of the app
+            - `playtime_2weeks` - How many minutes this user has played in the past 2 weeks (may be `null`)
+            - `playtime_forever` - How many minutes this user has played all time
+            - `img_icon_url` - A URL to the app's 32x32 square icon image
+            - `img_logo_url` - A URL to the app's 184x69 capsule logo image
+            - `has_community_visible_stats` - `true` if this app has visible community stats (e.g. /profiles/:steamID/stats/:appid)
+            - `playtime_windows_forever` - How many minutes this user has played all time on Windows
+            - `playtime_mac_forever` - How many minutes this user has played all time on Mac
+            - `playtime_linux_forever` - How many minutes this user has played all time on Linux
+
+**v4.16.0 or later is required to use this method**
+
+Retrieves a user's list of owned apps. The user's games must not be private.
+
+*This is functionally identical to [IPlayerService/GetOwnedGames](https://steamapi.xpaw.me/#IPlayerService/GetOwnedGames)
+but with some minor data processing.*
+
+### getOwnedProfileItems([options,] callback)
+- `options` - Optional. An object with zero or more of these properties:
+    - `language` - A language to localize item data into. Defaults to `english`
+- `callback` - Called when the request completes.
+    - `err` - An `Error` object on failure or `null` on success.
+    - `response` - The response object. Each property is an array of [profile item data](#profile-item-data) objects.
+        - `profile_backgrounds` - Owned profile backgrounds
+        - `mini_profile_backgrounds` - Owned miniprofile backgrounds
+        - `avatar_frames` - Owned avatar frames
+        - `animated_avatars` - Owned animated avatars
+        - `profile_modifiers` - Owned profile modifiers
+
+**v4.16.0 or later is required to use this method**
+
+Retrieves a listing of all profile items you currently own.
+
+#### Profile Item Data
+
+Profile item objects have these properties:
+
+- `communityitemid` - The asset ID of the item
+- `image_small` - The URL to the image shown in the inventory. May be `null`.
+- `image_large` - The URL to the full size of the item's image. May be `null` if not a profile background.
+- `name` - The internal name of the item
+- `item_title` - The localized name of the item
+- `item_description` - The localized description of the item
+- `appid` - The AppID of the app which owns this background
+- `item_type`
+- `item_class`
+- `movie_webm` - The URL to a webm version of a video associated with this item, likely for animated avatars.
+- `movie_mp4` - The URL to an mp4 version of a video associated with this item, likely for animated avatars.
+- `equipped_flags` - Unknown at this time
+
+### getEquippedProfileItems(steamID[, options], callback)
+- `steamID` - Either a `SteamID` object or a string that can parse into one for the user whose currently-equiped profile items you want to see
+- `options` - Optional. An object with zero or more of these properties:
+    - `language` - A language to localize item data into. Defaults to `english`
+- `callback` - Called when the request completes.
+    - `err` - An `Error` object on failure or `null` on success
+    - `response` - The response object. Each property is either `null` or a [profile item data](#profile-item-data) object
+        - `profile_background`
+        - `mini_profile_background`
+        - `avatar_frame`
+        - `animated_avatars`
+        - `profile_modifiers`
+
+**v4.16.0 or later is required to use this method**
+
+Retrieves a list of a given user's equipped profile items.
+
+### setProfileBackground(backgroundAssetID[, callback])
+- `backgroundAssetID` - The asset ID of the item you want to set as your background. Use `0` to remove your background.
+- `callback` - Optional. Called when the request completes.
+    - `err` - An `Error` object on failure or `null` on success.
+
+**v4.16.0 or later is required to use this method**
+
+Changes your own profile background.
 
 ### inviteToGroup(userSteamID, groupSteamID)
 - `userSteamID` - The SteamID of the user you want to invite, as a `SteamID` object or a string which can parse into one
@@ -1688,7 +1815,7 @@ Emitted on logon and when wallet balance changes. The [`wallet`](#wallet) proper
 - `licenses` - An array of licenses
 
 Contains the license data for the packages which your Steam account owns. To see license object structure, see
-[`CMsgClientLicenseList.License`](https://github.com/SteamRE/SteamKit/blob/SteamKit_1.6.3/Resources/Protobufs/steamclient/steammessages_clientserver.proto#L307-L320).
+[`CMsgClientLicenseList.License`](https://github.com/DoctorMcKay/node-steam-user/blob/master/protobufs/steammessages_clientserver.proto#L214-L233).
 
 Emitted on logon and when licenses change. The [`licenses`](#licenses) property will be updated after this event is
 emitted.

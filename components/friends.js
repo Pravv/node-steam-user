@@ -1,3 +1,4 @@
+const BinaryKVParser = require('binarykvparser');
 const ByteBuffer = require('bytebuffer');
 const StdLib = require('@doctormckay/stdlib');
 const SteamID = require('steamid');
@@ -33,13 +34,13 @@ SteamUser.prototype.setUIMode = function(mode) {
  * @param {function} [callback] - Optional. Called with `err` and `name` parameters on completion.
  */
 SteamUser.prototype.addFriend = function(steamID, callback) {
-	return StdLib.Promises.callbackPromise(['personaName'], callback, true, (accept, reject) => {
+	return StdLib.Promises.timeoutCallbackPromise(10000, ['personaName'], callback, true, (resolve, reject) => {
 		this._send(SteamUser.EMsg.ClientAddFriend, {"steamid_to_add": Helpers.steamID(steamID).getSteamID64()}, (body) => {
 			if (body.eresult != SteamUser.EResult.OK) {
 				return reject(Helpers.eresultError(body.eresult));
 			}
 
-			accept({
+			resolve({
 				"personaName": body.persona_name_added
 			});
 		});
@@ -65,7 +66,7 @@ SteamUser.prototype.removeFriend = function(steamID) {
  * @return {Promise}
  */
 SteamUser.prototype.blockUser = function(steamID, callback) {
-	return StdLib.Promises.callbackPromise(null, callback, true, (accept, reject) => {
+	return StdLib.Promises.timeoutCallbackPromise(10000, null, callback, true, (resolve, reject) => {
 		if (typeof steamID === 'string') {
 			steamID = new SteamID(steamID);
 		}
@@ -78,11 +79,7 @@ SteamUser.prototype.blockUser = function(steamID, callback) {
 		this._send(SteamUser.EMsg.ClientSetIgnoreFriend, buffer.flip(), (body) => {
 			body.readUint64(); // unknown
 			let err = Helpers.eresultError(body.readUint32());
-			if (err) {
-				return reject(err);
-			} else {
-				return accept();
-			}
+			return err ? reject(err) : resolve();
 		});
 	});
 };
@@ -94,7 +91,7 @@ SteamUser.prototype.blockUser = function(steamID, callback) {
  * @return {Promise}
  */
 SteamUser.prototype.unblockUser = function(steamID, callback) {
-	return StdLib.Promises.callbackPromise(null, callback, true, (accept, reject) => {
+	return StdLib.Promises.timeoutCallbackPromise(10000, null, callback, true, (resolve, reject) => {
 		if (typeof steamID === 'string') {
 			steamID = new SteamID(steamID);
 		}
@@ -107,11 +104,7 @@ SteamUser.prototype.unblockUser = function(steamID, callback) {
 		this._send(SteamUser.EMsg.ClientSetIgnoreFriend, buffer.flip(), (body) => {
 			body.readUint64(); // unknown
 			let err = Helpers.eresultError(body.readUint32());
-			if (err) {
-				return reject(err);
-			} else {
-				return accept();
-			}
+			return err ? reject(err) : resolve();
 		});
 	});
 };
@@ -130,7 +123,7 @@ SteamUser.prototype.createQuickInviteLink = function(options, callback) {
 
 	options = options || {};
 
-	return StdLib.Promises.callbackPromise(null, callback, false, (resolve, reject) => {
+	return StdLib.Promises.timeoutCallbackPromise(10000, null, callback, false, (resolve, reject) => {
 		this._sendUnified('UserAccount.CreateFriendInviteToken#1', {
 			// Accept both camelCase and snake_case for backwards compatibility
 			invite_limit: options.inviteLimit || options.invite_limit || 1,
@@ -154,7 +147,7 @@ SteamUser.prototype.createQuickInviteLink = function(options, callback) {
  * @returns {Promise}
  */
 SteamUser.prototype.listQuickInviteLinks = function(callback) {
-	return StdLib.Promises.callbackPromise(null, callback, false, (resolve, reject) => {
+	return StdLib.Promises.timeoutCallbackPromise(10000, null, callback, false, (resolve, reject) => {
 		this._sendUnified("UserAccount.GetFriendInviteTokens#1", {}, (body, hdr) => {
 			let err = Helpers.eresultError(hdr.proto);
 			if (err) {
@@ -182,7 +175,7 @@ function processInviteToken(userSteamId, token) {
  * @returns {Promise}
  */
 SteamUser.prototype.revokeQuickInviteLink = function(linkOrToken, callback) {
-	return StdLib.Promises.callbackPromise(null, callback, true, (resolve, reject) => {
+	return StdLib.Promises.timeoutCallbackPromise(10000, null, callback, true, (resolve, reject) => {
 		if (linkOrToken.includes('/')) {
 			// It's a link
 			let parts = linkOrToken.split('/');
@@ -225,7 +218,7 @@ SteamUser.prototype.getQuickInviteLinkSteamID = function(link) {
  * @returns {Promise<{valid: boolean, steamid: SteamID, invite_duration?: int}>}
  */
 SteamUser.prototype.checkQuickInviteLinkValidity = function(link, callback) {
-	return StdLib.Promises.callbackPromise(null, callback, false, (resolve, reject) => {
+	return StdLib.Promises.timeoutCallbackPromise(10000, null, callback, false, (resolve, reject) => {
 		let match = link.match(/^https?:\/\/s\.team\/p\/([^\/]+)\/([^\/]+)/);
 		if (!match) {
 			return reject(new Error('Malformed quick-invite link'));
@@ -257,7 +250,7 @@ SteamUser.prototype.checkQuickInviteLinkValidity = function(link, callback) {
  * @returns {Promise}
  */
 SteamUser.prototype.redeemQuickInviteLink = function(link, callback) {
-	return StdLib.Promises.callbackPromise(null, callback, true, (resolve, reject) => {
+	return StdLib.Promises.timeoutCallbackPromise(10000, null, callback, true, (resolve, reject) => {
 		let match = link.match(/^https?:\/\/s\.team\/p\/([^\/]+)\/([^\/]+)/);
 		if (!match) {
 			return reject(new Error('Malformed quick-invite link'));
@@ -288,7 +281,7 @@ SteamUser.prototype.redeemQuickInviteLink = function(link, callback) {
  * @return {Promise}
  */
 SteamUser.prototype.getPersonas = function(steamids, callback) {
-	return StdLib.Promises.callbackPromise(['personas'], callback, true, (accept, reject) => {
+	return StdLib.Promises.timeoutCallbackPromise(10000, ['personas'], callback, true, (resolve, reject) => {
 		const Flags = SteamUser.EClientPersonaStateFlag;
 		let flags = Flags.PlayerName | Flags.QueryPort | Flags.SourceID | Flags.Presence |
 			Flags.Metadata | Flags.LastSeen | Flags.ClanInfo | Flags.GameExtraInfo | Flags.GameDataBlob |
@@ -311,10 +304,14 @@ SteamUser.prototype.getPersonas = function(steamids, callback) {
 		let output = {};
 
 		ids.forEach((id) => {
-			this.once('user#' + id, receive);
+			Helpers.onceTimeout(10000, this, 'user#' + id, receive);
 		});
 
-		function receive(sid, user) {
+		function receive(err, sid, user) {
+			if (err) {
+				return reject(err);
+			}
+
 			let sid64 = sid.getSteamID64();
 			output[sid64] = user;
 
@@ -324,7 +321,7 @@ SteamUser.prototype.getPersonas = function(steamids, callback) {
 			}
 
 			if (ids.length === 0) {
-				accept({"personas": output});
+				resolve({"personas": output});
 			}
 		}
 	});
@@ -337,7 +334,7 @@ SteamUser.prototype.getPersonas = function(steamids, callback) {
  * @return {Promise}
  */
 SteamUser.prototype.getSteamLevels = function(steamids, callback) {
-	return StdLib.Promises.callbackPromise(['users'], callback, (accept, reject) => {
+	return StdLib.Promises.timeoutCallbackPromise(10000, ['users'], callback, (resolve, reject) => {
 		let accountids = steamids.map((steamID) => {
 			if (typeof steamID === 'string') {
 				return (new SteamID(steamID)).accountid;
@@ -359,7 +356,7 @@ SteamUser.prototype.getSteamLevels = function(steamids, callback) {
 				output[sid.getSteamID64()] = user.level;
 			});
 
-			accept({"users": output});
+			resolve({"users": output});
 		});
 	});
 };
@@ -371,7 +368,7 @@ SteamUser.prototype.getSteamLevels = function(steamids, callback) {
  * @returns {Promise}
  */
 SteamUser.prototype.getGameBadgeLevel = function(appid, callback) {
-	return StdLib.Promises.callbackPromise(['steamLevel', 'regularBadgeLevel', 'foilBadgeLevel'], callback, (accept, reject) => {
+	return StdLib.Promises.timeoutCallbackPromise(10000, ['steamLevel', 'regularBadgeLevel', 'foilBadgeLevel'], callback, (resolve, reject) => {
 		this._sendUnified("Player.GetGameBadgeLevels#1", {appid}, (body) => {
 			let regular = 0;
 			let foil = 0;
@@ -388,7 +385,9 @@ SteamUser.prototype.getGameBadgeLevel = function(appid, callback) {
 				}
 			});
 
-			accept({
+			resolve({
+				// these two level properties exist because we were using playerLevel while the docs said steamLevel
+				"steamLevel": body.player_level,
 				"playerLevel": body.player_level,
 				"regularBadgeLevel": regular,
 				"foilBadgeLevel": foil
@@ -432,7 +431,7 @@ SteamUser.prototype.respondToGroupInvite = function(groupSteamID, accept) {
  * @return {Promise}
  */
 SteamUser.prototype.createFriendsGroup = function(groupName, callback) {
-	return StdLib.Promises.callbackPromise(['groupID'], callback, true, (accept, reject) => {
+	return StdLib.Promises.timeoutCallbackPromise(10000, ['groupID'], callback, true, (resolve, reject) => {
 		this._send(SteamUser.EMsg.AMClientCreateFriendsGroup, {
 			"groupname": groupName
 		}, (body) => {
@@ -445,7 +444,7 @@ SteamUser.prototype.createFriendsGroup = function(groupName, callback) {
 				members: []
 			};
 
-			return accept({"groupID": body.groupid});
+			return resolve({"groupID": body.groupid});
 		});
 	});
 };
@@ -457,7 +456,7 @@ SteamUser.prototype.createFriendsGroup = function(groupName, callback) {
  * @return {Promise}
  */
 SteamUser.prototype.deleteFriendsGroup = function(groupID, callback) {
-	return StdLib.Promises.callbackPromise(null, callback, true, (accept, reject) => {
+	return StdLib.Promises.timeoutCallbackPromise(10000, null, callback, true, (resolve, reject) => {
 		this._send(SteamUser.EMsg.AMClientDeleteFriendsGroup, {
 			"groupid": groupID
 		}, (body) => {
@@ -467,7 +466,7 @@ SteamUser.prototype.deleteFriendsGroup = function(groupID, callback) {
 
 			delete this.myFriendGroups[groupID];
 
-			return accept();
+			return resolve();
 		});
 	});
 };
@@ -480,7 +479,7 @@ SteamUser.prototype.deleteFriendsGroup = function(groupID, callback) {
  * @return {Promise}
  */
 SteamUser.prototype.renameFriendsGroup = function(groupID, newName, callback) {
-	return StdLib.Promises.callbackPromise(null, callback, true, (accept, reject) => {
+	return StdLib.Promises.timeoutCallbackPromise(10000, null, callback, true, (resolve, reject) => {
 		this._send(SteamUser.EMsg.AMClientRenameFriendsGroup, {
 			"groupid": groupID,
 			"groupname": newName
@@ -491,7 +490,7 @@ SteamUser.prototype.renameFriendsGroup = function(groupID, newName, callback) {
 
 			this.myFriendGroups[groupID].name = newName;
 
-			return accept();
+			return resolve();
 		});
 	});
 };
@@ -504,7 +503,7 @@ SteamUser.prototype.renameFriendsGroup = function(groupID, newName, callback) {
  * @return {Promise}
  */
 SteamUser.prototype.addFriendToGroup = function(groupID, userSteamID, callback) {
-	return StdLib.Promises.callbackPromise(null, callback, true, (accept, reject) => {
+	return StdLib.Promises.timeoutCallbackPromise(10000, null, callback, true, (resolve, reject) => {
 		let sid = Helpers.steamID(userSteamID);
 
 		this._send(SteamUser.EMsg.AMClientAddFriendToGroup, {
@@ -517,7 +516,7 @@ SteamUser.prototype.addFriendToGroup = function(groupID, userSteamID, callback) 
 
 			this.myFriendGroups[groupID].members.push(sid);
 
-			return accept();
+			return resolve();
 		});
 	});
 };
@@ -530,7 +529,7 @@ SteamUser.prototype.addFriendToGroup = function(groupID, userSteamID, callback) 
  * @return {Promise}
  */
 SteamUser.prototype.removeFriendFromGroup = function(groupID, userSteamID, callback) {
-	return StdLib.Promises.callbackPromise(null, callback, true, (accept, reject) => {
+	return StdLib.Promises.timeoutCallbackPromise(10000, null, callback, true, (resolve, reject) => {
 		let sid = Helpers.steamID(userSteamID);
 
 		this._send(SteamUser.EMsg.AMClientRemoveFriendFromGroup, {
@@ -549,7 +548,7 @@ SteamUser.prototype.removeFriendFromGroup = function(groupID, userSteamID, callb
 				this.myFriendGroups[groupID].members.splice(index, 1);
 			}
 
-			return accept();
+			return resolve();
 		});
 	});
 };
@@ -561,7 +560,7 @@ SteamUser.prototype.removeFriendFromGroup = function(groupID, userSteamID, callb
  * @return {Promise}
  */
 SteamUser.prototype.getAliases = function(userSteamIDs, callback) {
-	return StdLib.Promises.callbackPromise(['users'], callback, (accept, reject) => {
+	return StdLib.Promises.timeoutCallbackPromise(10000, ['users'], callback, (resolve, reject) => {
 		if (!(userSteamIDs instanceof Array)) {
 			userSteamIDs = [userSteamIDs];
 		}
@@ -587,7 +586,7 @@ SteamUser.prototype.getAliases = function(userSteamIDs, callback) {
 				});
 			}
 
-			return accept({"users": ids});
+			return resolve({"users": ids});
 		});
 	});
 };
@@ -600,7 +599,7 @@ SteamUser.prototype.getAliases = function(userSteamIDs, callback) {
  * @return {Promise}
  */
 SteamUser.prototype.setNickname = function(steamID, nickname, callback) {
-	return StdLib.Promises.callbackPromise(null, callback, true, (accept, reject) => {
+	return StdLib.Promises.timeoutCallbackPromise(10000, null, callback, true, (resolve, reject) => {
 		steamID = Helpers.steamID(steamID);
 		this._send(SteamUser.EMsg.AMClientSetPlayerNickname, {
 			"steamid": steamID.toString(),
@@ -617,7 +616,7 @@ SteamUser.prototype.setNickname = function(steamID, nickname, callback) {
 				this.myNicknames[steamID.toString()] = nickname;
 			}
 
-			return accept();
+			return resolve();
 		});
 	});
 };
@@ -628,12 +627,12 @@ SteamUser.prototype.setNickname = function(steamID, nickname, callback) {
  * @return {Promise}
  */
 SteamUser.prototype.getNicknames = function(callback) {
-	return StdLib.Promises.callbackPromise(['nicknames'], callback, true, (accept, reject) => {
+	return StdLib.Promises.timeoutCallbackPromise(10000, ['nicknames'], callback, true, (resolve, reject) => {
 		this._sendUnified("Player.GetNicknameList#1", {}, (body) => {
 			let nicks = {};
 			body.nicknames.forEach(player => nicks[SteamID.fromIndividualAccountID(player.accountid).getSteamID64()] = player.nickname);
 
-			accept({"nicknames": nicks});
+			resolve({"nicknames": nicks});
 
 			this.emit('nicknameList', nicks);
 			this.myNicknames = nicks;
@@ -644,14 +643,28 @@ SteamUser.prototype.getNicknames = function(callback) {
 /**
  * Get the localization keys for rich presence for an app on Steam.
  * @param {int} appID - The app you want rich presence localizations for
- * @param {string} language - The full name of the language you want localizations for (e.g. "english" or "spanish")
+ * @param {string} [language] - The full name of the language you want localizations for (e.g. "english" or "spanish"); defaults to language passed to constructor
  * @param {function} [callback]
  * @returns {Promise}
  */
 SteamUser.prototype.getAppRichPresenceLocalization = function(appID, language, callback) {
-	return StdLib.Promises.callbackPromise(null, callback, (accept, reject) => {
+	return StdLib.Promises.timeoutCallbackPromise(10000, null, callback, (resolve, reject) => {
+		let cacheKey = `${appID}_${language}`;
+		let cache = this._richPresenceLocalization[cacheKey];
+		if (cache && Date.now() - cache.timestamp < (1000 * 60 * 60)) {
+			// Cache for 1 hour
+			return resolve({tokens: cache.tokens});
+		}
+
+		if (typeof language == 'function') {
+			callback = language;
+			language = null;
+		}
+
+		language = language || this.options.language || 'english';
+
 		this._sendUnified('Community.GetAppRichPresenceLocalization#1', {
-			"appid": appID,
+			appid: appID,
 			language
 		}, (body) => {
 			if (body.appid != appID) {
@@ -674,13 +687,150 @@ SteamUser.prototype.getAppRichPresenceLocalization = function(appID, language, c
 			}
 
 			if (Object.keys(tokens).length > 0) {
-				this._richPresenceLocalization[appID] = {
-					"timestamp": Date.now(),
+				this._richPresenceLocalization[cacheKey] = {
+					timestamp: Date.now(),
 					tokens
 				};
 			}
 
-			return accept({tokens});
+			return resolve({tokens});
+		});
+	});
+};
+
+/**
+ * Upload some rich presence data to Steam.
+ * @param {int} appid
+ * @param {{steam_display?, connect?}} richPresence
+ */
+SteamUser.prototype.uploadRichPresence = function(appid, richPresence) {
+	// Maybe someday in the future we'll have a proper binary KV encoder. For now, just do it by hand.
+	let buf = new ByteBuffer(1024, ByteBuffer.LITTLE_ENDIAN);
+	buf.writeByte(0);
+	buf.writeCString('RP');
+	for (let i in richPresence) {
+		if (!richPresence.hasOwnProperty(i)) {
+			continue;
+		}
+
+		buf.writeByte(1); // type string
+		buf.writeCString(i);
+		buf.writeCString(richPresence[i]);
+	}
+	buf.writeByte(8); // end
+	buf.writeByte(8); // end again
+
+	this._send({
+		// Header
+		msg: SteamUser.EMsg.ClientRichPresenceUpload,
+		proto: {routing_appid: appid}
+	}, {
+		// Request
+		rich_presence_kv: buf.flip().toBuffer()
+	});
+};
+
+/**
+ * Request rich presence data of one or more users for an appid.
+ * @param {int} appid - The appid to get rich presence data for
+ * @param {SteamID[]|string[]|SteamID|string} steamIDs - SteamIDs of users to request rich presence data for
+ * @param {string} [language] - Language to get localized strings in. Defaults to language passed to constructor.
+ * @param {function} [callback] - Called or resolved with 'users' property with each key being a SteamID and value being the rich presence response if received
+ * @return Promise
+ */
+SteamUser.prototype.requestRichPresence = function(appid, steamIDs, language, callback) {
+	return StdLib.Promises.timeoutCallbackPromise(10000, null, callback, (resolve, reject) => {
+		if (!Array.isArray(steamIDs)) {
+			steamIDs = [steamIDs];
+		}
+
+		if (typeof language == 'function') {
+			callback = language;
+			language = null;
+		}
+
+		this._send({
+			// Header
+			msg: SteamUser.EMsg.ClientRichPresenceRequest,
+			proto: {routing_appid: appid},
+		}, {
+			// Request
+			steamid_request: steamIDs.map(sid => Helpers.steamID(sid).getSteamID64())
+		}, async (body) => {
+			// Response
+			let response = {};
+			body.rich_presence = body.rich_presence || [];
+			for (let rp of body.rich_presence) {
+				let kv = rp.rich_presence_kv;
+				if (!kv || !rp.steamid_user) {
+					continue;
+				}
+
+				try {
+					let kvObj = BinaryKVParser.parse(kv); // This will throw in the event of there being no RP data (e.g. user not in game)
+					if (kvObj && kvObj.RP) {
+						response[rp.steamid_user] = {
+							richPresence: kvObj.RP,
+							localizedString: null,
+						};
+						// Do this separately as it will reject if it cannot localize
+						response[rp.steamid_user].localizedString = await this._getRPLocalizedString(appid, kvObj.RP, language);
+					}
+				} catch (e) {
+					// don't care, there's nothing here
+				}
+			}
+
+			resolve({users: response});
+		});
+	});
+};
+
+/**
+ * Get the list of a user's owned apps.
+ * @param {SteamID|string} steamID - Either a SteamID object or a string that can parse into one
+ * @param {{includePlayedFreeGames?: boolean, filterAppids?: number[], includeFreeSub?: boolean}} [options]
+ * @param {function} [callback]
+ * @returns {Promise}
+ */
+SteamUser.prototype.getUserOwnedApps = function(steamID, options, callback) {
+	if (typeof options == 'function') {
+		callback = options;
+		options = {};
+	}
+
+	options = options || {};
+
+	return new StdLib.Promises.timeoutCallbackPromise(10000, null, callback, false, (resolve, reject) => {
+		steamID = Helpers.steamID(steamID);
+		this._sendUnified('Player.GetOwnedGames#1', {
+			steamid: steamID.toString(),
+			include_appinfo: true,
+			include_played_free_games: options.includePlayedFreeGames || false,
+			appids_filter: options.filterAppids || undefined,
+			include_free_sub: options.includeFreeSub || false
+		}, (body, hdr) => {
+			let err = Helpers.eresultError(hdr.proto);
+			if (err) {
+				return reject(err);
+			}
+
+			let response = {
+				app_count: body.game_count,
+				apps: body.games.map((app) => {
+					if (app.img_icon_url) {
+						app.img_icon_url = `https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/${app.appid}/${app.img_icon_url}.jpg`;
+					}
+
+					if (app.img_logo_url) {
+						app.img_logo_url = `https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/${app.appid}/${app.img_logo_url}.jpg`;
+					}
+
+					return app;
+				})
+			};
+
+			resolve(response);
 		});
 	});
 };
@@ -716,7 +866,7 @@ SteamUser.prototype._handlerManager.add(SteamUser.EMsg.ClientPersonaState, funct
 
 			this._emitIdEvent('user', sid, processedUser);
 
-			if (processedUser.gameid) {
+			if (processedUser.gameid && processedUser.gameid != 0) {
 				this._addAppToCache(processedUser.gameid);
 			}
 
@@ -923,8 +1073,9 @@ SteamUser.prototype._handlerManager.add('PlayerClient.NotifyFriendNicknameChange
 	}
 });
 
+
 function processUser(steamUser, user) {
-	return new Promise((accept) => {
+	return new Promise((resolve) => {
 		g_ProcessPersonaSemaphore.wait(async (release) => {
 			if (typeof user.last_logoff === 'number') {
 				user.last_logoff = new Date(user.last_logoff * 1000);
@@ -956,13 +1107,13 @@ function processUser(steamUser, user) {
 			if ((user.rich_presence && user.rich_presence.length == 0) || user.gameid === '0') {
 				delete user.rich_presence_string;
 				release();
-				return accept(user);
+				return resolve(user);
 			}
 
 			if (!user.rich_presence) {
 				// if we don't have rich_presence data right now, there's nothing to parse
 				release();
-				return accept(user);
+				return resolve(user);
 			}
 
 			let rpTokens = {};
@@ -973,56 +1124,68 @@ function processUser(steamUser, user) {
 			if (!rpTokens.steam_display) {
 				// Nothing to do here
 				release();
-				return accept(user);
+				return resolve(user);
 			}
 
-			let localizationTokens;
-			if (steamUser._richPresenceLocalization[user.gameid] && steamUser._richPresenceLocalization[user.gameid].timestamp > (Date.now() - (1000 * 60 * 60 * 24))) {
-				// We already have localization
-				localizationTokens = steamUser._richPresenceLocalization[user.gameid].tokens;
-			} else {
-				try {
-					localizationTokens = (await steamUser.getAppRichPresenceLocalization(user.gameid, steamUser.options.language || "english")).tokens;
-				} catch (ex) {
-					// Oh well
-					delete user.rich_presence_string;
-					release();
-					return accept(user);
-				}
+			try {
+				user.rich_presence_string = await steamUser._getRPLocalizedString(user.gameid, rpTokens);
+			} catch (ex) {
+				delete user.rich_presence_string;
 			}
 
-			for (let i in rpTokens) {
-				if (rpTokens.hasOwnProperty(i) && localizationTokens[rpTokens[i]]) {
-					rpTokens[i] = localizationTokens[rpTokens[i]];
-				}
-			}
-
-			let rpString = rpTokens.steam_display;
-			while (true) {
-				let newRpString = rpString;
-				for (let i in rpTokens) {
-					if (rpTokens.hasOwnProperty(i)) {
-						newRpString = newRpString.replace(new RegExp('%' + i + '%', 'gi'), rpTokens[i]);
-					}
-				}
-
-				(newRpString.match(/{#[^}]+}/g) || []).forEach((token) => {
-					token = token.substring(1, token.length - 1);
-					if (localizationTokens[token]) {
-						newRpString = newRpString.replace(new RegExp('{' + token + '}', 'gi'), localizationTokens[token]);
-					}
-				});
-
-				if (newRpString == rpString) {
-					break;
-				} else {
-					rpString = newRpString;
-				}
-			}
-
-			user.rich_presence_string = rpString;
 			release();
-			return accept(user);
+			return resolve(user);
 		});
 	});
 }
+
+/**
+ * @private
+ */
+SteamUser.prototype._getRPLocalizedString = function(appid, tokens, language) {
+	return new Promise(async (resolve, reject) => {
+		if (!tokens.steam_display) {
+			// Nothing to do here
+			return reject();
+		}
+
+		let localizationTokens;
+		try {
+			localizationTokens = (await this.getAppRichPresenceLocalization(appid, language || this.options.language)).tokens;
+		} catch (ex) {
+			// Oh well
+			return reject(ex);
+		}
+
+		let rpTokens = JSON.parse(JSON.stringify(tokens)); // So we don't modify the original objects
+		for (let i in rpTokens) {
+			if (rpTokens.hasOwnProperty(i) && localizationTokens[rpTokens[i]]) {
+				rpTokens[i] = localizationTokens[rpTokens[i]];
+			}
+		}
+
+		let rpString = rpTokens.steam_display;
+		while (true) {
+			let newRpString = rpString;
+			for (let i in rpTokens) {
+				if (rpTokens.hasOwnProperty(i)) {
+					newRpString = newRpString.replace(new RegExp('%' + i + '%', 'gi'), rpTokens[i]);
+				}
+			}
+
+			(newRpString.match(/{#[^}]+}/g) || []).forEach((token) => {
+				token = token.substring(1, token.length - 1);
+				if (localizationTokens[token]) {
+					newRpString = newRpString.replace(new RegExp('{' + token + '}', 'gi'), localizationTokens[token]);
+				}
+			});
+
+			if (newRpString == rpString) {
+				break;
+			} else {
+				rpString = newRpString;
+			}
+		}
+		return resolve(rpString);
+	});
+};
