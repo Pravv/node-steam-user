@@ -411,7 +411,7 @@ SteamUser.prototype._send = function(emsgOrHeader, body, callback) {
 		this._jobs[jobIdSource] = callback;
 
 		// Clean up old job callbacks after 2 minutes
-		setTimeout(() => delete this._jobs[jobIdSource], 1000 * 60 * 2);
+		this._jobCleanupTimers.push(setTimeout(() => delete this._jobs[jobIdSource], 1000 * 60 * 2));
 	}
 
 	let emsgName = EMsg[emsg] || emsg;
@@ -459,9 +459,25 @@ SteamUser.prototype._send = function(emsgOrHeader, body, callback) {
 /**
  * Handles a raw binary netmessage by parsing the header and routing it appropriately
  * @param {Buffer} buffer
+ * @param {BaseConnection} [conn]
+ * @param {string} [multiId]
  * @private
  */
-SteamUser.prototype._handleNetMessage = function(buffer) {
+SteamUser.prototype._handleNetMessage = function(buffer, conn, multiId) {
+	if (conn && conn != this._connection) {
+		let ghostConnId = conn.connectionType[0] + conn.connectionId;
+		let expectedConnId = this._connection ? (this._connection.connectionType[0] + this._connection.connectionId) : 'NO CONNECTION';
+		this.emit('debug', `Received net message from ghost connection ${ghostConnId} (expected ${expectedConnId})`);
+		return;
+	}
+
+	if (this._useMessageQueue && !multiId) {
+		// Multi sub-messages skip the queue because we need messages contained in a decoded multi to be processed first
+		this._incomingMessageQueue.push(arguments);
+		this.emit('debug', `Enqueued incoming message; queue size is now ${this._incomingMessageQueue.length}`);
+		return;
+	}
+
 	let buf = ByteBuffer.wrap(buffer, ByteBuffer.LITTLE_ENDIAN);
 
 	let rawEMsg = buf.readUint32();
@@ -503,18 +519,28 @@ SteamUser.prototype._handleNetMessage = function(buffer) {
 		delete this._tempSteamID;
 	}
 
-	this._handleMessage(header, buf.slice());
+	this._handleMessage(header, buf.slice(), conn, multiId);
 };
 
 /**
  * Handles and routes a parsed message
  * @param {object} header
  * @param {ByteBuffer} bodyBuf
+ * @param {BaseConnection} [conn]
+ * @param {string} [multiId]
  * @private
  */
-SteamUser.prototype._handleMessage = function(header, bodyBuf) {
+SteamUser.prototype._handleMessage = function(header, bodyBuf, conn, multiId) {
+	// Is this a multi? If yes, short-circuit and just process it now.
+	if (header.msg == EMsg.Multi) {
+		this._processMulti(header, exports.decodeProto(protobufs[EMsg.Multi], bodyBuf), conn);
+		return;
+	}
+
 	let msgName = EMsg[header.msg] || header.msg;
 	let handlerName = header.msg;
+
+	let debugPrefix = multiId ? `[${multiId}] ` : (conn ? `[${conn.connectionType[0]}${conn.connectionId}] ` : '');
 
 	let isServiceMethodMsg = [EMsg.ServiceMethod, EMsg.ServiceMethodResponse].includes(header.msg);
 	if (isServiceMethodMsg) {
@@ -525,17 +551,17 @@ SteamUser.prototype._handleMessage = function(header, bodyBuf) {
 				msgName += '_Response';
 			}
 		} else {
-			this.emit('debug', 'Got ' + (header.msg == EMsg.ServiceMethod ? 'ServiceMethod' : 'ServiceMethodResponse') + ' without target_job_name');
+			this.emit('debug', debugPrefix + 'Got ' + (header.msg == EMsg.ServiceMethod ? 'ServiceMethod' : 'ServiceMethodResponse') + ' without target_job_name');
 			return;
 		}
 	}
 
 	if (!isServiceMethodMsg && header.proto && header.proto.target_job_name) {
-		this.emit('debug', 'Got unknown target_job_name ' + header.proto.target_job_name + ' for msg ' + msgName);
+		this.emit('debug', debugPrefix + 'Got unknown target_job_name ' + header.proto.target_job_name + ' for msg ' + msgName);
 	}
 
 	if (!this._handlerManager.hasHandler(handlerName) && !this._jobs[header.targetJobID]) {
-		this.emit(VERBOSE_EMSG_LIST.includes(header.msg) ? 'debug-verbose' : 'debug', 'Unhandled message: ' + msgName);
+		this.emit(VERBOSE_EMSG_LIST.includes(header.msg) ? 'debug-verbose' : 'debug', debugPrefix + 'Unhandled message: ' + msgName);
 		return;
 	}
 
@@ -544,7 +570,7 @@ SteamUser.prototype._handleMessage = function(header, bodyBuf) {
 		body = exports.decodeProto(protobufs[handlerName], bodyBuf);
 	}
 
-	this.emit(VERBOSE_EMSG_LIST.includes(header.msg) ? 'debug-verbose' : 'debug', 'Handled message: ' + msgName);
+	this.emit(VERBOSE_EMSG_LIST.includes(header.msg) ? 'debug-verbose' : 'debug', debugPrefix + 'Handled message: ' + msgName);
 
 	let cb = null;
 	if (header.sourceJobID != JOBID_NONE) {
@@ -572,34 +598,68 @@ SteamUser.prototype._handleMessage = function(header, bodyBuf) {
 	}
 };
 
-// Handlers
-
-SteamUser.prototype._handlerManager.add(EMsg.Multi, function(body) {
-	this.emit('debug-verbose', 'Processing ' + (body.size_unzipped ? 'gzipped ' : '') + 'multi msg');
+SteamUser.prototype._processMulti = async function(header, body, conn) {
+	let multiId = conn.connectionType[0] + conn.connectionId + '#' + (++this._multiCount);
+	this.emit('debug-verbose', `=== Processing ${body.size_unzipped ? 'gzipped multi msg' : 'multi msg'} ${multiId} (${body.message_body.length} bytes) ===`);
 
 	let payload = body.message_body;
+
+	// Enable the message queue while we're unzipping the message (or waiting until the next event loop cycle).
+	// This prevents any messages from getting processed out of order.
+	this._useMessageQueue = true;
+
 	if (body.size_unzipped) {
-		Zlib.gunzip(payload, (err, unzipped) => {
-			if (err) {
-				this.emit('error', err);
-				this._disconnect(true);
-				return;
-			}
+		try {
+			payload = await new Promise((resolve, reject) => {
+				Zlib.gunzip(payload, (err, unzipped) => {
+					if (err) {
+						return reject(err);
+					}
 
-			processMulti.call(this, unzipped);
-		});
-	} else {
-		processMulti.call(this, payload);
-	}
-
-	function processMulti(payload) {
-		while (payload.length && (this.steamID || this._tempSteamID)) {
-			let subSize = payload.readUInt32LE(0);
-			this._handleNetMessage(payload.slice(4, 4 + subSize));
-			payload = payload.slice(4 + subSize);
+					resolve(unzipped);
+				});
+			});
+		} catch (ex) {
+			this.emit('error', ex);
+			this._disconnect(true);
+			return;
 		}
+	} else {
+		// Await a setImmediate promise to guarantee that multi msg processing always takes at least one iteration of the event loop.
+		// This avoids message queue processing shenanigans. Waiting until the next iteration of the event loop enables
+		// _handleNetMessage at the end of this method to return immediately, which will thus exit the clear-queue loop
+		// because the queue got re-enabled. Prevents the queue from being cleared in multiple places at once.
+		await new Promise(resolve => setImmediate(resolve));
 	}
-});
+
+	if (!this._connection || this._connection != conn) {
+		this.emit('debug', `=== Bailing out on processing multi msg ${multiId} because our connection is lost! ===`);
+		return;
+	}
+
+	while (payload.length && (this.steamID || this._tempSteamID)) {
+		let subSize = payload.readUInt32LE(0);
+		this._handleNetMessage(payload.slice(4, 4 + subSize), conn, multiId);
+		payload = payload.slice(4 + subSize);
+	}
+
+	this.emit('debug-verbose', `=== Finished processing multi msg ${multiId}; now clearing queue of size ${this._incomingMessageQueue.length} ===`);
+
+	// Go ahead and process anything in the queue now. First disable the message queue. We don't need to worry about
+	// newly-received messages sneaking in ahead of the queue being cleared, since message processing is synchronous.
+	// If we encounter another multi msg, the message queue will get re-enabled.
+	this._useMessageQueue = false;
+
+	// Continue to pop items from the message queue until it's empty, or it gets re-enabled. If the message queue gets
+	// re-enabled, immediately stop popping items from it to avoid stuff getting out of order.
+	while (this._incomingMessageQueue.length > 0 && !this._useMessageQueue) {
+		this._handleNetMessage.apply(this, this._incomingMessageQueue.shift());
+	}
+
+	if (this._incomingMessageQueue.length > 0) {
+		this.emit('debug-verbose', `[${multiId}] Message queue processing ended early with ${this._incomingMessageQueue.length} elements remaining`);
+	}
+};
 
 // Unified messages
 

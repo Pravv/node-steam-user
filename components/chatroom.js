@@ -1044,18 +1044,22 @@ function parseBbCode(str) {
 	str = str.replace(/\\\[/g, replacement);
 
 	let parsed = BBCode.parse(str, {
-		"onlyAllowTags": [
-			"emoticon",
-			"code",
-			"pre",
-			"img",
-			"url",
-			"spoiler",
-			"quote",
-			"random",
-			"flip",
-			"tradeofferlink",
-			"tradeoffer"
+		onlyAllowTags: [
+			'emoticon',
+			'code',
+			'pre',
+			'img',
+			'url',
+			'spoiler',
+			'quote',
+			'random',
+			'flip',
+			'tradeofferlink',
+			'tradeoffer',
+			'sticker',
+			'gameinvite',
+			'og',
+			'roomeffect'
 		]
 	});
 

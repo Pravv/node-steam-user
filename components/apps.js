@@ -162,7 +162,6 @@ SteamUser.prototype.getProductInfo = function(apps, packages, inclTokens, callba
 			"unknownApps": [],
 			"unknownPackages": []
 		};
-		let callbackFired = false;
 
 		apps = apps.map((app) => {
 			if (typeof app === 'object') {
@@ -262,6 +261,8 @@ SteamUser.prototype.getProductInfo = function(apps, packages, inclTokens, callba
 			});
 
 			(body.apps || []).forEach((app) => {
+				// _parsedData will be populated if we have the PICS cache enabled.
+				// If we don't, we need to parse the data here.
 				response.apps[app.appid] = app._parsedData || {
 					"changenumber": app.change_number,
 					"missingToken": !!app.missing_token,
@@ -278,7 +279,7 @@ SteamUser.prototype.getProductInfo = function(apps, packages, inclTokens, callba
 				response.packages[pkg.packageid] = pkg._parsedData || {
 					"changenumber": pkg.change_number,
 					"missingToken": !!pkg.missing_token,
-					"packageinfo": BinaryKVParser.parse(pkg.buffer)[pkg.packageid]
+					"packageinfo": pkg.buffer ? BinaryKVParser.parse(pkg.buffer)[pkg.packageid] : null
 				};
 
 				let index = packageids.indexOf(pkg.packageid);
